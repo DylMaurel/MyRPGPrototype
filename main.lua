@@ -1,0 +1,69 @@
+--[[
+    MyRPG Prototype
+
+    Dylan Maurel
+
+    ART:
+    Courtesy of ...
+]]
+
+require 'src/Dependencies'
+
+function love.load()
+    love.window.setTitle('myRPG')
+    -- This filter creates a more vintage, pixel-like look.
+    love.graphics.setDefaultFilter('nearest', 'nearest')
+    math.randomseed(os.time())
+
+    -- The push library enable us to code towards a virtual screen size. This way,
+    -- users can resize the screen without any complications.
+    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+        fullscreen = false,
+        vsync = true,
+        resizable = true
+    })
+
+    -- initialize the global state stack that will determine the flow of the game.
+    gStateStack = StateStack()
+    gStateStack:push(FieldState())
+
+    love.keyboard.keysPressed = {}
+end
+
+
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
+-- Whenever a key is pressed, love will call this function.
+-- We have added our own keysPressed table to love.keyboard.
+-- So, any part of the code can query the keysPressed table to
+-- see what keys were pressed during a given frame.
+-- This idea was learned from CS50's Intro to Game Dev course.
+function love.keypressed(key)
+    if key == 'escape' then
+        love.event.quit()
+    end
+
+    love.keyboard.keysPressed[key] = true
+end
+
+
+function love.keyboard.wasPressed(key)
+    return love.keyboard.keysPressed[key]
+end
+
+
+function love.update(dt)
+    Timer.update(dt)
+    gStateStack:update(dt)
+
+    love.keyboard.keysPressed = {}
+end
+
+
+function love.draw()
+    push:start()
+    gStateStack:render()
+    push:finish()
+end
