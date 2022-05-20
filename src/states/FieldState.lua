@@ -12,14 +12,21 @@ function FieldState:init()
 
     --gSounds['field-music']:setLooping(true)
     --gSounds['field-music']:play()
+
+    -- Create the player 
     self.player = Player {
         animations = ENTITY_DEFS['player'].animations,
         width = 16,
         height = 16
     }
+    -- Place the player on the map.
     self.player.x = TILE_SIZE * 5
     self.player.y = TILE_SIZE * 16
+    -- Create the stateMachine for the player.
     self.player.stateMachine = StateMachine {
+        -- The PlayerWalkState needs access to the FieldState so that the
+        -- player can interact with world objects and entities. So, whenever
+        -- a PlayerWalkState is created, we pass self into it.
         ['walk'] = function() return PlayerWalkState(self.player, self) end,
         ['idle'] = function() return PlayerIdleState(self.player) end
     }
