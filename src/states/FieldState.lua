@@ -34,18 +34,18 @@ function FieldState:update(dt)
 
     local halfWindowWidth = love.graphics.getWidth() / 2
     local halfWindowHeight = love.graphics.getHeight() / 2
+    -- We now need to make the camera track the player.
     -- Making the camera look at (love.graphics.getWidth() / 2, love.graphics.getHeight() / 2) will
-    -- fix the camera in the top left of the screen. This is because the coordinates for the camera
-    -- indicate the middle of the camera.
+    -- fix the camera in the top left of the screen. This is how the camera library is implemented. 
     -- The rest of the calculation will position the camera to have the player in the center.
     -- 11 is about the width and height of the player when the player sprite is scaled by 0.7.
     self.cam:lookAt(math.floor(halfWindowWidth + self.player.x - VIRTUAL_WIDTH / 2 + 11),
                    math.floor(halfWindowHeight + self.player.y - VIRTUAL_HEIGHT / 2 + 11))
     
+    -- We now need to make sure that the camera doesn't show anywhere beyond borders of the gameArea
     local camX, camY = self.cam:position()
     local mapW = self.gameArea.mapWidth * TILE_SIZE
     local mapH = self.gameArea.mapHeight * TILE_SIZE
-
     -- left map border
     if camX < halfWindowWidth then
         camX = halfWindowWidth
