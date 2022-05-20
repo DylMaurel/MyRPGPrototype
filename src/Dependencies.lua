@@ -9,6 +9,7 @@ push = require 'lib/push'
 Timer = require 'lib/knife.timer'
 sti = require 'lib/sti'
 Camera = require 'lib/camera'
+Windfield = require 'lib/windfield'
 
 require 'src/StateMachine'
 require 'src/StateStack'
