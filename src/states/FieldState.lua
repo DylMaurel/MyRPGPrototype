@@ -5,7 +5,7 @@
     A FieldState is meant to encapsulate the state of a free-roaming
     game area by containing a player, objects, entities, and a tilemap
     for the area.
-    The idea is to provide the ability to create multiple FieldStates
+    We also wnat to provide the ability to create multiple FieldStates
     on top of each other. For example, A FieldState for a town area can
     be pushed to the StateStack, and then another FieldState can be created
     and pushed for the  interior of a building in the town.
@@ -27,7 +27,7 @@ function FieldState:init()
     --gSounds['field-music']:setLooping(true)
     --gSounds['field-music']:play()
     self.collidables = {}
-
+    self.physicsWorld:addCollisionClass('Button')
     if self.gameArea.map.layers['collidables'] then
         -- Loop through all the objects we created for the map in Tiled, and
         -- create physics colliders for each one.
@@ -35,9 +35,11 @@ function FieldState:init()
             local collidable = self.physicsWorld:newRectangleCollider(
                 obj.x, obj.y, obj.width, obj.height)
             collidable:setType('static')
+            collidable:setCollisionClass('Button')
             table.insert(self.collidables, collidable)
         end
     end
+
     --  
     -- Creating the player
     --
@@ -66,8 +68,11 @@ function FieldState:init()
     --
     -- Done creating the player
     --
-
+    self.physicsWorld:addCollisionClass('Player')
+    self.player.collider:setCollisionClass('Player')
+    
     self.cam = Camera()
+    self.score = 0
 end
 
 function FieldState:update(dt)
@@ -78,6 +83,31 @@ function FieldState:update(dt)
     -- so we need to subtract some offset values.
     self.player.x = self.player.collider:getX() - 11
     self.player.y = self.player.collider:getY() - 16
+
+    -- Allow the player to query the world by pressing 'enter' or 'return'.
+    -- This means we will create a collider in front of the player and see
+    -- if it collides with any interactable objects or entities.
+    self.queryCircle = nil
+    if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
+        local queryX, queryY = self.player.x + 11, self.player.y + 12
+        if self.player.direction == 'left' then
+            queryX = queryX - 12
+        
+        elseif self.player.direction == 'right' then
+            queryX = queryX + 15
+        
+        elseif self.player.direction == 'up' then
+            queryY = queryY - 10
+        
+        elseif self.player.direction == 'down' then
+            queryY = queryY + 18
+        end
+        self.queryCircle = {x=queryX, y=queryY, radius = 10}
+        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 10, {'Button'})
+        if #colliders > 0 then
+            self.score = self.score + 1
+        end
+    end
 
 
     -- We now need to make the camera track the player.
@@ -120,5 +150,9 @@ function FieldState:render()
         -- Calling player:render() will call :render() for the player's current state.)
         self.player:render()
         self.physicsWorld:draw()
+        if self.queryCircle then
+            love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
+        end
     self.cam:detach()
+    love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
 end

@@ -7,28 +7,33 @@ end
 
 function PlayerWalkState:update(dt)
     local xVel, yVel = 0, 0
+    local goIdle = true
 
     if love.keyboard.isDown('left') then
         self.player.direction = 'left'
         self.player:changeAnimation('walk-left')
-        xVel = -PLAYER_WALK_SPEED
-        --self.player.x = self.player.x - PLAYER_WALK_SPEED * dt
-    elseif love.keyboard.isDown('right') then
+         xVel = xVel - PLAYER_WALK_SPEED
+         goIdle = false
+    end
+    if love.keyboard.isDown('right') then
         self.player.direction = 'right'
         self.player:changeAnimation('walk-right')
-        xVel = PLAYER_WALK_SPEED
-        --self.player.x = self.player.x + PLAYER_WALK_SPEED * dt
-    elseif love.keyboard.isDown('up') then
+        xVel = xVel + PLAYER_WALK_SPEED
+        goIdle = false
+    end
+    if love.keyboard.isDown('up') then
         self.player.direction = 'up'
         self.player:changeAnimation('walk-up')
-        yVel = -PLAYER_WALK_SPEED
-        --self.player.y = self.player.y - PLAYER_WALK_SPEED * dt
-    elseif love.keyboard.isDown('down') then
+        yVel = yVel - PLAYER_WALK_SPEED
+        goIdle = false
+    end
+    if love.keyboard.isDown('down') then
         self.player.direction = 'down'
         self.player:changeAnimation('walk-down')
-        yVel = PLAYER_WALK_SPEED
-        --self.player.y = self.player.y + PLAYER_WALK_SPEED * dt
-    else
+        yVel = yVel + PLAYER_WALK_SPEED
+        goIdle = false
+    end
+    if goIdle then
         self.player:changeState('idle')
     end
 
