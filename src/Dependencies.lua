@@ -16,7 +16,9 @@ require 'src/StateStack'
 require 'src/constants'
 require 'src/Util'
 require 'src/Animation'
-require 'src/world/townArea'
+require 'src/Doorway'
+require 'src/world/GameArea'
+require 'src/world/GameArea_Defs'
 require 'src/states/BaseState'
 require 'src/states/FieldState'
 require 'src/entities/entity_defs'
@@ -34,4 +36,12 @@ gTextures = {
 
 gFrames = {
     ['player-walk'] = GenerateQuads(gTextures['player-walk'], 32, 32)
+}
+
+gSounds = {
+    ['music'] = love.audio.newSource('sounds/music.mp3', 'static'),
+    ['sword'] = love.audio.newSource('sounds/sword.wav', 'static'),
+    ['hit-enemy'] = love.audio.newSource('sounds/hit_enemy.wav', 'static'),
+    ['hit-player'] = love.audio.newSource('sounds/hit_player.wav', 'static'),
+    ['door'] = love.audio.newSource('sounds/door.wav', 'static')
 }

@@ -25,7 +25,9 @@ function love.load()
 
     -- initialize the global state stack that will determine the flow of the game.
     gStateStack = StateStack()
-    gStateStack:push(FieldState())
+    -- Specify which area needs to be loaded in the FieldState. Also specify the
+    -- starting position of the player.
+    gStateStack:push(FieldState('town-area', TILE_SIZE * 5, TILE_SIZE * 16))
 
     love.keyboard.keysPressed = {}
 end

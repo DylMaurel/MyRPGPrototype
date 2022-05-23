@@ -21,13 +21,13 @@
 FieldState = Class{__includes = BaseState}
 
 -- will have to be modified to take in the gameArea as an argument
-function FieldState:init()
-    self.gameArea = townArea()
+function FieldState:init(areaName, playerX, playerY, playerDir)
+    self.gameArea = GameArea(GAME_AREA_DEFS[areaName])
     self.physicsWorld = Windfield.newWorld(0,0)
-    --gSounds['field-music']:setLooping(true)
-    --gSounds['field-music']:play()
     self.collidables = {}
-    self.physicsWorld:addCollisionClass('Button')
+    self.doorways = {}
+    self.physicsWorld:addCollisionClass('Doorway')
+
     if self.gameArea.map.layers['collidables'] then
         -- Loop through all the objects we created for the map in Tiled, and
         -- create physics colliders for each one.
@@ -35,7 +35,16 @@ function FieldState:init()
             local collidable = self.physicsWorld:newRectangleCollider(
                 obj.x, obj.y, obj.width, obj.height)
             collidable:setType('static')
-            collidable:setCollisionClass('Button')
+
+            if obj.properties.isDoorway then
+                local doorway = Doorway(
+                    {x=obj.x, y=obj.y, width=obj.width, height=obj.height,
+                    direction = obj.properties.direction, type = obj.properties.type,
+                    name = obj.properties.name})
+                self.doorways[doorway.name] = doorway
+                collidable:setCollisionClass('Doorway')
+                collidable:setObject(doorway)
+            end
             table.insert(self.collidables, collidable)
         end
     end
@@ -46,11 +55,12 @@ function FieldState:init()
     self.player = Player {
         animations = ENTITY_DEFS['player'].animations,
         width = 16,
-        height = 16
+        height = 16,
+        direction = playerDir
     }
     -- Place the player on the map.
-    self.player.x = TILE_SIZE * 5
-    self.player.y = TILE_SIZE * 16
+    self.player.x = playerX
+    self.player.y = playerY
     -- Create the stateMachine for the player.
     self.player.stateMachine = StateMachine {
         -- The PlayerWalkState needs access to the FieldState so that the
@@ -87,7 +97,7 @@ function FieldState:update(dt)
     -- Allow the player to query the world by pressing 'enter' or 'return'.
     -- This means we will create a collider in front of the player and see
     -- if it collides with any interactable objects or entities.
-    self.queryCircle = nil
+    self.queryCircle = nil --visualizing the queryCircle
     if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
         local queryX, queryY = self.player.x + 11, self.player.y + 12
         if self.player.direction == 'left' then
@@ -102,10 +112,30 @@ function FieldState:update(dt)
         elseif self.player.direction == 'down' then
             queryY = queryY + 18
         end
-        self.queryCircle = {x=queryX, y=queryY, radius = 10}
-        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 10, {'Button'})
+        self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
+        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 8, {'Doorway'})
         if #colliders > 0 then
             self.score = self.score + 1
+            local doorway = colliders[1]:getObject()
+            -- make sure the player is facing the proper direction to enter the door.
+            if (self.player.direction == doorway.direction) and doorway.type == 'closed' then
+                -- We need to find the name of the next area to load, based on the doorway
+                -- that was selected.
+                gSounds['door']:play()
+                gStateStack:pop()
+                gStateStack:push(FieldState(
+                    GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name].area,
+                    doorway.x + doorway.width - 8,
+                    doorway.y - 32,
+                    self.player.direction
+                    )
+                )
+                -- then we pop twice
+                -- then we push new area
+                -- then we push fadeOut
+                -- then fadeOut must be popped
+            end
+            
         end
     end
 
@@ -120,27 +150,29 @@ function FieldState:update(dt)
     self.cam:lookAt(math.floor(halfWindowWidth + self.player.x - VIRTUAL_WIDTH / 2 + 11),
                    math.floor(halfWindowHeight + self.player.y - VIRTUAL_HEIGHT / 2 + 11))
     
-    -- We now need to make sure that the camera doesn't show anywhere beyond borders of the gameArea
-    local camX, camY = self.cam:position()
-    local mapW = self.gameArea.mapWidth * TILE_SIZE
-    local mapH = self.gameArea.mapHeight * TILE_SIZE
-    -- left map border
-    if camX < halfWindowWidth then
-        camX = halfWindowWidth
+    if not self.gameArea.showBlackSpace then
+        -- We now need to make sure that the camera doesn't show anywhere beyond borders of the gameArea
+        local camX, camY = self.cam:position()
+        local mapW = self.gameArea.mapWidth * TILE_SIZE
+        local mapH = self.gameArea.mapHeight * TILE_SIZE
+        -- left map border
+        if camX < halfWindowWidth then
+            camX = halfWindowWidth
+        end
+        -- right map border
+        if camX > mapW + halfWindowWidth - VIRTUAL_WIDTH then
+            camX = mapW + halfWindowWidth - VIRTUAL_WIDTH
+        end
+        -- top map border
+        if camY < halfWindowHeight then
+            camY = halfWindowHeight
+        end
+        -- bottom map border
+        if camY > mapH + halfWindowHeight - VIRTUAL_HEIGHT then
+            camY = mapH + halfWindowHeight - VIRTUAL_HEIGHT
+        end
+        self.cam:lookAt(camX, camY)
     end
-    -- right map border
-    if camX > mapW + halfWindowWidth - VIRTUAL_WIDTH then
-        camX = mapW + halfWindowWidth - VIRTUAL_WIDTH
-    end
-    -- top map border
-    if camY < halfWindowHeight then
-        camY = halfWindowHeight
-    end
-    -- bottom map border
-    if camY > mapH + halfWindowHeight - VIRTUAL_HEIGHT then
-        camY = mapH + halfWindowHeight - VIRTUAL_HEIGHT
-    end
-    self.cam:lookAt(camX, camY)
     
 end
 
@@ -153,6 +185,11 @@ function FieldState:render()
         if self.queryCircle then
             love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
         end
+
+        if self.gameArea.map.layers['render-last'] then
+            self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
+        end
     self.cam:detach()
-    love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
+    love.graphics.print(tostring(self.score), 8, 8)
+
 end
