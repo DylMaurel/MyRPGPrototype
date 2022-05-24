@@ -93,11 +93,14 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
     self.player.collider:setFixedRotation(true)
     self.physicsWorld:addCollisionClass('Player')
     self.player.collider:setCollisionClass('Player')
+    self.player.x = self.player.collider:getX() - 11
+    self.player.y = self.player.collider:getY() - 16
     --
     -- Done creating the player
     --
+    
     self.cam = Camera()
-    self.score = 0
+    FieldState:updateCamera(self)
 end
 
 function FieldState:update(dt)
@@ -114,19 +117,6 @@ function FieldState:update(dt)
     -- if it collides with any interactable objects or entities.
     self.queryCircle = nil --visualizing the queryCircle
     if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
-        -- local queryX, queryY = self.player.x + 11, self.player.y + 12
-        -- if self.player.direction == 'left' then
-        --     queryX = queryX - 12
-        
-        -- elseif self.player.direction == 'right' then
-        --     queryX = queryX + 15
-        
-        -- elseif self.player.direction == 'up' then
-        --     queryY = queryY - 10
-        
-        -- elseif self.player.direction == 'down' then
-        --     queryY = queryY + 18
-        -- end
         local queryX = self.player.x + self.player.width * PLAYER_SCALE
         local queryY = self.player.y + self.player.height * PLAYER_SCALE + 5
         if self.player.direction == 'left' then
@@ -144,30 +134,47 @@ function FieldState:update(dt)
         self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
         local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
         if #colliders > 0 then
-            self.score = self.score + 1
             local doorway = colliders[1]:getObject()
             -- make sure the player is facing the proper direction to enter the door.
             if (self.player.direction == doorway.direction) and doorway.type == 'closed' then
                 gSounds['door']:play()
                 -- Remove the current FieldState from the StateStack.
                 -- In the future, we could call some function here that saves game data.
-                gStateStack:pop()
-                -- To make the new FieldState, we need to know which game area to load
-                -- and which door we appear from. This info is defined in GAME_AREA_DEFS.
-                local doorInfo = GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name]
-                gStateStack:push(FieldState(
-                    doorInfo.area, doorInfo.otherDoor, self.player.direction)
-                )
-                -- then we pop twice
-                -- then we push new area
-                -- then we push fadeOut
-                -- then fadeOut must be popped
+                gStateStack:push(FadeInState( {r=0,g=0,b=0}, 0.5,
+                    function()
+                        -- Pop the current FieldState. This happens after FadeInState pops itself.
+                        gStateStack:pop()
+                        local doorInfo = GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name]
+                        gStateStack:push(FieldState(
+                            doorInfo.area, doorInfo.otherDoor, self.player.direction)
+                        )
+                        gStateStack:push(FadeOutState( {r=0, g=0, b=0}, 0.5, function() end))
+                    end
+                ))
             end
-            
         end
     end
+    FieldState:updateCamera(self)
+end
+
+function FieldState:render()
+    self.cam:attach()
+        self.gameArea:render()
+        -- Calling player:render() will call :render() for the player's current state.)
+        self.player:render()
+        self.physicsWorld:draw()
+        if self.queryCircle then
+            love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
+        end
+
+        if self.gameArea.map.layers['render-last'] then
+            self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
+        end
+    self.cam:detach()
+end
 
 
+function FieldState:updateCamera(self)
     -- We now need to make the camera track the player.
     local halfWindowWidth = love.graphics.getWidth() / 2
     local halfWindowHeight = love.graphics.getHeight() / 2
@@ -201,23 +208,5 @@ function FieldState:update(dt)
         end
         self.cam:lookAt(camX, camY)
     end
-    
-end
-
-function FieldState:render()
-    self.cam:attach()
-        self.gameArea:render()
-        -- Calling player:render() will call :render() for the player's current state.)
-        self.player:render()
-        self.physicsWorld:draw()
-        if self.queryCircle then
-            love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
-        end
-
-        if self.gameArea.map.layers['render-last'] then
-            self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
-        end
-    self.cam:detach()
-    love.graphics.print(tostring(self.score), 8, 8)
 
 end
