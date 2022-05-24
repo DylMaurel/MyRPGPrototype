@@ -43,5 +43,5 @@ end
 function PlayerWalkState:render()
     local anim = self.player.currentAnimation
     love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
-        math.floor(self.player.x), math.floor(self.player.y), 0, 0.7, 0.7)
+        math.floor(self.player.x), math.floor(self.player.y), 0, PLAYER_SCALE, PLAYER_SCALE)
 end

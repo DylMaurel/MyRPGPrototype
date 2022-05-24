@@ -21,7 +21,7 @@
 FieldState = Class{__includes = BaseState}
 
 -- will have to be modified to take in the gameArea as an argument
-function FieldState:init(areaName, playerX, playerY, playerDir)
+function FieldState:init(areaName, arrivalDoorName, playerDir)
     self.gameArea = GameArea(GAME_AREA_DEFS[areaName])
     self.physicsWorld = Windfield.newWorld(0,0)
     self.collidables = {}
@@ -58,9 +58,25 @@ function FieldState:init(areaName, playerX, playerY, playerDir)
         height = 16,
         direction = playerDir
     }
-    -- Place the player on the map.
-    self.player.x = playerX
-    self.player.y = playerY
+    -- Place the player on the map. Their position depends on what door the player
+    -- arrived from. 
+    local arrivalDoor = self.doorways[arrivalDoorName]
+    local px, py = 0, 0
+    if playerDir == 'up' then
+        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * PLAYER_SCALE / 2)
+        py = arrivalDoor.y - self.player.height
+    elseif playerDir == 'down' then
+        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * PLAYER_SCALE / 2)
+        py = arrivalDoor.y + arrivalDoor.height
+    elseif playerDir == 'left' then
+        px = arrivalDoor.x - self.player.width
+        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * PLAYER_SCALE / 2)
+    else
+        px = arrivalDoor.x + arrivalDoor.width
+        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * PLAYER_SCALE / 2)
+    end
+    self.player.x = px
+    self.player.y = py
     -- Create the stateMachine for the player.
     self.player.stateMachine = StateMachine {
         -- The PlayerWalkState needs access to the FieldState so that the
@@ -75,12 +91,11 @@ function FieldState:init(areaName, playerX, playerY, playerDir)
         self.player.x, self.player.y, 11, 13, 9        
     )
     self.player.collider:setFixedRotation(true)
+    self.physicsWorld:addCollisionClass('Player')
+    self.player.collider:setCollisionClass('Player')
     --
     -- Done creating the player
     --
-    self.physicsWorld:addCollisionClass('Player')
-    self.player.collider:setCollisionClass('Player')
-    
     self.cam = Camera()
     self.score = 0
 end
@@ -99,36 +114,49 @@ function FieldState:update(dt)
     -- if it collides with any interactable objects or entities.
     self.queryCircle = nil --visualizing the queryCircle
     if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
-        local queryX, queryY = self.player.x + 11, self.player.y + 12
+        -- local queryX, queryY = self.player.x + 11, self.player.y + 12
+        -- if self.player.direction == 'left' then
+        --     queryX = queryX - 12
+        
+        -- elseif self.player.direction == 'right' then
+        --     queryX = queryX + 15
+        
+        -- elseif self.player.direction == 'up' then
+        --     queryY = queryY - 10
+        
+        -- elseif self.player.direction == 'down' then
+        --     queryY = queryY + 18
+        -- end
+        local queryX = self.player.x + self.player.width * PLAYER_SCALE
+        local queryY = self.player.y + self.player.height * PLAYER_SCALE + 5
         if self.player.direction == 'left' then
-            queryX = queryX - 12
+            queryX = queryX - self.player.width * PLAYER_SCALE
         
         elseif self.player.direction == 'right' then
-            queryX = queryX + 15
+            queryX = queryX + self.player.width * PLAYER_SCALE
         
         elseif self.player.direction == 'up' then
-            queryY = queryY - 10
+            queryY = queryY - self.player.height * PLAYER_SCALE
         
         elseif self.player.direction == 'down' then
-            queryY = queryY + 18
+            queryY = queryY + self.player.height * PLAYER_SCALE
         end
         self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
-        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 8, {'Doorway'})
+        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
         if #colliders > 0 then
             self.score = self.score + 1
             local doorway = colliders[1]:getObject()
             -- make sure the player is facing the proper direction to enter the door.
             if (self.player.direction == doorway.direction) and doorway.type == 'closed' then
-                -- We need to find the name of the next area to load, based on the doorway
-                -- that was selected.
                 gSounds['door']:play()
+                -- Remove the current FieldState from the StateStack.
+                -- In the future, we could call some function here that saves game data.
                 gStateStack:pop()
+                -- To make the new FieldState, we need to know which game area to load
+                -- and which door we appear from. This info is defined in GAME_AREA_DEFS.
+                local doorInfo = GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name]
                 gStateStack:push(FieldState(
-                    GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name].area,
-                    doorway.x + doorway.width - 8,
-                    doorway.y - 32,
-                    self.player.direction
-                    )
+                    doorInfo.area, doorInfo.otherDoor, self.player.direction)
                 )
                 -- then we pop twice
                 -- then we push new area
