@@ -40,7 +40,7 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
                 local doorway = Doorway(
                     {x=obj.x, y=obj.y, width=obj.width, height=obj.height,
                     direction = obj.properties.direction, type = obj.properties.type,
-                    name = obj.properties.name})
+                    name = obj.properties.name, fadeColor = obj.properties.fadeColor})
                 self.doorways[doorway.name] = doorway
                 collidable:setCollisionClass('Doorway')
                 collidable:setObject(doorway)
@@ -98,7 +98,7 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
     --
     -- Done creating the player
     --
-    
+
     self.cam = Camera()
     FieldState:updateCamera(self)
 end
@@ -140,15 +140,17 @@ function FieldState:update(dt)
                 gSounds['door']:play()
                 -- Remove the current FieldState from the StateStack.
                 -- In the future, we could call some function here that saves game data.
-                gStateStack:push(FadeInState( {r=0,g=0,b=0}, 0.5,
+                gStateStack:push(FadeInState( doorway.fadeColor, 0.5,
                     function()
                         -- Pop the current FieldState. This happens after FadeInState pops itself.
                         gStateStack:pop()
+                        -- We need to know what game area to go to as well as what door the player
+                        -- needs to appear from. This info is found in GAME_AREA_DEFS
                         local doorInfo = GAME_AREA_DEFS[self.gameArea.name].doorways[doorway.name]
                         gStateStack:push(FieldState(
                             doorInfo.area, doorInfo.otherDoor, self.player.direction)
                         )
-                        gStateStack:push(FadeOutState( {r=0, g=0, b=0}, 0.5, function() end))
+                        gStateStack:push(FadeOutState( doorway.fadeColor, 0.5, function() end))
                     end
                 ))
             end
@@ -174,6 +176,10 @@ function FieldState:render()
 end
 
 
+--
+-- Even though this method is better suited to be private, the StateStack and StateMachine
+-- are the only other classes where methods are called on a state. So I don't think it's a big deal.
+--
 function FieldState:updateCamera(self)
     -- We now need to make the camera track the player.
     local halfWindowWidth = love.graphics.getWidth() / 2

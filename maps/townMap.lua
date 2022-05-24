@@ -659,6 +659,7 @@ return {
           visible = true,
           properties = {
             ["direction"] = "up",
+            ["fadeColor"] = "black",
             ["isDoorway"] = true,
             ["name"] = "inn-door",
             ["type"] = "closed"

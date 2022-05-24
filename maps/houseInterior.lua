@@ -166,6 +166,7 @@ return {
           visible = true,
           properties = {
             ["direction"] = "down",
+            ["fadeColor"] = "white",
             ["isDoorway"] = true,
             ["name"] = "exit",
             ["type"] = "closed"

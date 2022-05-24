@@ -138,6 +138,7 @@
   <object id="43" x="144" y="272" width="32" height="32">
    <properties>
     <property name="direction" value="up"/>
+    <property name="fadeColor" value="black"/>
     <property name="isDoorway" type="bool" value="true"/>
     <property name="name" value="inn-door"/>
     <property name="type" value="closed"/>

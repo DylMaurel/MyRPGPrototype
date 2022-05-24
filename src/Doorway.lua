@@ -12,6 +12,13 @@ function Doorway:init(def, onPassThrough)
     -- Doors have 2 types: open and closed. Closed doors require the player to
     -- select the door, but open doors do not require the player to select them.
     self.type = def.type or 'open'
+    -- fadeColor is the color that must be passed into the FadeIn and FadeOut
+    -- states whenever the player passes through the door.
+    if def.fadeColor == 'black' then
+        self.fadeColor = {r=0,g=0,b=0}
+    else
+        self.fadeColor = {r=1,g=1,b=1} --white
+    end
 
     -- A field for whether the door is locked or unlocked can be added in the future.
 

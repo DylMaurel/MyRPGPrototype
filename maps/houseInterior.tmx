@@ -57,6 +57,7 @@
   <object id="1" x="158" y="255" width="39" height="6">
    <properties>
     <property name="direction" value="down"/>
+    <property name="fadeColor" value="white"/>
     <property name="isDoorway" type="bool" value="true"/>
     <property name="name" value="exit"/>
     <property name="type" value="closed"/>
