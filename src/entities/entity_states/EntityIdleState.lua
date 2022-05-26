@@ -13,6 +13,7 @@ function EntityIdleState:init(entity)
     -- used for AI waiting
     self.waitDuration = 0
     self.waitTimer = 0
+    self.triedChangeDir = false
 
     
 end
@@ -26,9 +27,27 @@ function EntityIdleState:processAI(params, dt)
         self.waitDuration = math.random(5)
     else
         self.waitTimer = self.waitTimer + dt
+        -- Chance to change their direction after waiting for a while 
+        if self.triedChangeDir == false and self.waitTimer > self.waitDuration / 2 then
+            self.triedChangeDir = true
+            local directions = {'up', 'down', 'left', 'right'}
+            if math.random(2) == 1 then
+                self.entity.direction = directions[math.random(#directions)]
+                self.entity:changeAnimation('idle-' .. self.entity.direction)
+                -- Chance to stay still for a while
+                if math.random(2) == 2 then
+                    self.waitTimer = 0
+                end
+            end
+        end
+
 
         if self.waitTimer > self.waitDuration then
-            self.entity:changeState('walk')
+            if math.random(2) == 1 then
+                self.entity:changeState('walk')
+            else
+                self.entity:changeState('idle')
+            end
         end
     end
 end

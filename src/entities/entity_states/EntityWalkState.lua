@@ -29,7 +29,7 @@ function EntityWalkState:processAI(params, dt)
     if self.moveDuration == 0 then
         
         -- set an initial move duration and direction
-        self.moveDuration = math.random(2)
+        self.moveDuration = math.random()
         self.entity.direction = directions[math.random(#directions)]
         self.entity:changeAnimation('walk-' .. tostring(self.entity.direction))
         local xVel, yVel = 0, 0
@@ -47,11 +47,11 @@ function EntityWalkState:processAI(params, dt)
         self.movementTimer = 0
 
         -- chance to go idle
-        if math.random(2) == 1 then
+        if math.random() <= 0.75 then
             self.entity.collider:setLinearVelocity(0, 0)
             self.entity:changeState('idle')
         else
-            self.moveDuration = math.random(5)
+            self.moveDuration = math.random()
             self.entity.direction = directions[math.random(#directions)]
             self.entity:changeAnimation('walk-' .. tostring(self.entity.direction))
             local xVel, yVel = 0, 0
