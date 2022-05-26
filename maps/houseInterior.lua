@@ -8,8 +8,8 @@ return {
   height = 18,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 7,
-  nextobjectid = 14,
+  nextlayerid = 8,
+  nextobjectid = 15,
   properties = {},
   tilesets = {
     {
@@ -327,6 +327,36 @@ return {
           rotation = 0,
           visible = true,
           properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 7,
+      name = "entity-locations",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 14,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 178,
+          y = 120,
+          width = 9,
+          height = 8,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["entityName"] = "grandma"
+          }
         }
       }
     },

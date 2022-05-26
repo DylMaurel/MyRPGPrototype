@@ -19,5 +19,5 @@ end
 function PlayerIdleState:render()
     local anim = self.entity.currentAnimation
     love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
-        math.floor(self.entity.x), math.floor(self.entity.y), 0, PLAYER_SCALE, PLAYER_SCALE)
+        math.floor(self.entity.x), math.floor(self.entity.y), 0, CHARACTER_SCALE, CHARACTER_SCALE)
 end

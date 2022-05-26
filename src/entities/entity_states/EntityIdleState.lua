@@ -11,8 +11,10 @@ function EntityIdleState:init(entity)
     self.entity:changeAnimation('idle-' .. self.entity.direction)
 
     -- used for AI waiting
-    -- self.waitDuration = 0
-    -- self.waitTimer = 0
+    self.waitDuration = 0
+    self.waitTimer = 0
+
+    
 end
 
 --[[
@@ -20,19 +22,19 @@ end
     we can use this same state in our Player class and have it not take action.
 ]]
 function EntityIdleState:processAI(params, dt)
-    -- if self.waitDuration == 0 then
-    --     self.waitDuration = math.random(5)
-    -- else
-    --     self.waitTimer = self.waitTimer + dt
+    if self.waitDuration == 0 then
+        self.waitDuration = math.random(5)
+    else
+        self.waitTimer = self.waitTimer + dt
 
-    --     if self.waitTimer > self.waitDuration then
-    --         self.entity:changeState('walk')
-    --     end
-    -- end
+        if self.waitTimer > self.waitDuration then
+            self.entity:changeState('walk')
+        end
+    end
 end
 
 function EntityIdleState:render()
     local anim = self.entity.currentAnimation
     love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
-        self.entity.x, self.entity.y)
+        math.floor(self.entity.x), math.floor(self.entity.y), 0, CHARACTER_SCALE, CHARACTER_SCALE)
 end

@@ -48,6 +48,9 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
             table.insert(self.collidables, collidable)
         end
     end
+    -- Create table of all non-player entities in the area. 
+    self.entities = {}
+    self:generateEntities()
 
     --  
     -- Creating the player
@@ -63,17 +66,17 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
     local arrivalDoor = self.doorways[arrivalDoorName]
     local px, py = 0, 0
     if playerDir == 'up' then
-        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * PLAYER_SCALE / 2)
+        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * CHARACTER_SCALE / 2)
         py = arrivalDoor.y - self.player.height
     elseif playerDir == 'down' then
-        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * PLAYER_SCALE / 2)
+        px = arrivalDoor.x + math.floor(arrivalDoor.width / 2 - self.player.width * CHARACTER_SCALE / 2)
         py = arrivalDoor.y + arrivalDoor.height
     elseif playerDir == 'left' then
         px = arrivalDoor.x - self.player.width
-        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * PLAYER_SCALE / 2)
+        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * CHARACTER_SCALE / 2)
     else
         px = arrivalDoor.x + arrivalDoor.width
-        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * PLAYER_SCALE / 2)
+        py = arrivalDoor.y + math.floor(arrivalDoor.height / 2 - self.player.height * CHARACTER_SCALE / 2)
     end
     self.player.x = px
     self.player.y = py
@@ -106,6 +109,12 @@ end
 function FieldState:update(dt)
     self.gameArea:update(dt)
     self.player:update(dt)
+    for _, entity in pairs(self.entities) do
+        entity:processAI(self, dt)
+        entity:update(dt)
+        entity.x = entity.collider:getX() - 11
+        entity.y = entity.collider:getY() - 16
+    end
     self.physicsWorld:update(dt)
     -- The coordinates of the player and player.collider are slightly off,
     -- so we need to subtract some offset values.
@@ -117,19 +126,19 @@ function FieldState:update(dt)
     -- if it collides with any interactable objects or entities.
     self.queryCircle = nil --visualizing the queryCircle
     if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
-        local queryX = self.player.x + self.player.width * PLAYER_SCALE
-        local queryY = self.player.y + self.player.height * PLAYER_SCALE + 5
+        local queryX = self.player.x + self.player.width * CHARACTER_SCALE
+        local queryY = self.player.y + self.player.height * CHARACTER_SCALE + 5
         if self.player.direction == 'left' then
-            queryX = queryX - self.player.width * PLAYER_SCALE
+            queryX = queryX - self.player.width * CHARACTER_SCALE
         
         elseif self.player.direction == 'right' then
-            queryX = queryX + self.player.width * PLAYER_SCALE
+            queryX = queryX + self.player.width * CHARACTER_SCALE
         
         elseif self.player.direction == 'up' then
-            queryY = queryY - self.player.height * PLAYER_SCALE
+            queryY = queryY - self.player.height * CHARACTER_SCALE
         
         elseif self.player.direction == 'down' then
-            queryY = queryY + self.player.height * PLAYER_SCALE
+            queryY = queryY + self.player.height * CHARACTER_SCALE
         end
         self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
         local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
@@ -162,7 +171,9 @@ end
 function FieldState:render()
     self.cam:attach()
         self.gameArea:render()
-        -- Calling player:render() will call :render() for the player's current state.)
+        for _, entity in pairs(self.entities) do
+            entity:render()
+        end
         self.player:render()
         self.physicsWorld:draw()
         if self.queryCircle then
@@ -172,9 +183,60 @@ function FieldState:render()
         if self.gameArea.map.layers['render-last'] then
             self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
         end
+
+        --love.graphics.draw(gTextures['female-warrior'], gFrames['female-warrior'][1], 271, 344, 0, 0.7, 0.7)
     self.cam:detach()
+    
+    
+   
+    
 end
 
+
+function FieldState:generateEntities()
+    self.physicsWorld:addCollisionClass('Entity')
+    if self.gameArea.map.layers['entity-locations'] then
+        for _, obj in pairs(self.gameArea.map.layers['entity-locations'].objects) do
+            local entity = Entity(
+                {animations = ENTITY_DEFS[obj.properties.entityName].animations,
+                width = 16, height = 16, x = obj.x, y = obj.y})
+
+            entity.stateMachine = StateMachine {
+                ['walk'] = function() return EntityWalkState(entity, self) end,
+                ['idle'] = function() return EntityIdleState(entity) end
+            }
+            entity.stateMachine:change('idle')
+
+            entity.collider = self.physicsWorld:newBSGRectangleCollider(
+                entity.x + 6, entity.y + entity.height / 2, 11, 13, 9)
+            entity.collider:setCollisionClass('Entity')
+            entity.collider:setFixedRotation(true)
+            -- Setting the entity's mass really high prevents the player from pushing the entity. 
+            entity.collider:setMass(1000)
+            -- Here we set the callback function that will be called when this entity collides
+            -- with something, but before the collision response is actually calculated.
+            entity.collider:setPreSolve(function(collider_1, collider_2, contact)
+                if collider_1.collision_class == 'Player' and collider_2.collision_class == 'Entity' then
+                    -- Setting the entity's velocity to zero just before the collision will make sure
+                    -- that the entity does not push the player. Also, the entity conveniently stops moving.
+                    collider_2:setLinearVelocity(0,0)
+                    local obj = collider_2:getObject()
+                    obj:changeState('idle')
+                elseif collider_1.collision_class == 'Entity' and collider_2.collision_class == 'Player' then
+                    collider_1:setLinearVelocity(0,0)
+                    local obj = collider_1:getObject()
+                    obj:changeState('idle')
+                end
+            end)
+            -- By setting the entity object to its collider, we are able to retrieve the object
+            -- whenever the physicsWorld
+            entity.collider:setObject(entity)
+
+            table.insert(self.entities, entity)
+        end
+    end
+
+end
 
 --
 -- Even though this method is better suited to be private, the StateStack and StateMachine

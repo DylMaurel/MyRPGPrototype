@@ -13,8 +13,8 @@ function Entity:init(def)
     self.width = def.width
     self.height = def.height
 
-    self.x = 0
-    self.y = 0
+    self.x = def.x or 0
+    self.y = def.y or 0
     
 end
 

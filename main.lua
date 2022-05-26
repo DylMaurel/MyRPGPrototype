@@ -67,5 +67,6 @@ end
 function love.draw()
     push:start()
     gStateStack:render()
+    love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 10, 10)
     push:finish()
 end

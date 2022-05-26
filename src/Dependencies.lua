@@ -33,11 +33,21 @@ require 'src/entities/entity_states/PlayerWalkState'
 
 gTextures = {
     -- player
-    ['player-walk'] = love.graphics.newImage('graphics/Male 14-1.png')
+    ['player-walk'] = love.graphics.newImage('graphics/Male 14-1.png'),
+    ['dog'] = love.graphics.newImage('graphics/Dog 01-3.png'),
+    ['female-warrior'] = love.graphics.newImage('graphics/Female 02-1.png'),
+    ['grandma'] = love.graphics.newImage('graphics/Female 19-3.png'),
+    ['male-priest'] = love.graphics.newImage('graphics/Male 08-4.png'),
+    ['male-young'] = love.graphics.newImage('graphics/Male 10-3.png')
 }
 
 gFrames = {
-    ['player-walk'] = GenerateQuads(gTextures['player-walk'], 32, 32)
+    ['player-walk'] = GenerateQuads(gTextures['player-walk'], 32, 32),
+    ['dog'] = GenerateQuads(gTextures['dog'], 32, 32),
+    ['female-warrior'] = GenerateQuads(gTextures['female-warrior'], 32, 32),
+    ['grandma'] = GenerateQuads(gTextures['grandma'], 32, 32),
+    ['male-priest'] = GenerateQuads(gTextures['male-priest'], 32, 32),
+    ['male-young'] = GenerateQuads(gTextures['male-young'], 32, 32)
 }
 
 gSounds = {

@@ -8,8 +8,8 @@ return {
   height = 27,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 7,
-  nextobjectid = 50,
+  nextlayerid = 8,
+  nextobjectid = 53,
   properties = {},
   tilesets = {
     {
@@ -756,6 +756,66 @@ return {
             ["isDoorway"] = true,
             ["name"] = "left-exit",
             ["type"] = "open"
+          }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 7,
+      name = "entity-locations",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 50,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 440,
+          y = 339,
+          width = 8,
+          height = 9,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["entityName"] = "dog"
+          }
+        },
+        {
+          id = 51,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 271,
+          y = 344,
+          width = 10,
+          height = 9,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["entityName"] = "female-warrior"
+          }
+        },
+        {
+          id = 52,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 652,
+          y = 299,
+          width = 8,
+          height = 7,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["entityName"] = "male-priest"
           }
         }
       }
