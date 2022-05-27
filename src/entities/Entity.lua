@@ -7,9 +7,8 @@ Entity = Class{}
 
 function Entity:init(def)
     self.direction = def.direction or 'down'
-
     self.animations = self:createAnimations(def.animations)
-
+    self.dialogueText = def.dialogueText
     self.width = def.width
     self.height = def.height
 
@@ -44,7 +43,9 @@ end
     Called when we interact with this entity, as by pressing enter.
 ]]
 function Entity:onInteract()
-
+    if self.dialogueText then
+        gStateStack:push(DialogueState(self.dialogueText, gFonts['medium']))
+    end
 end
 
 function Entity:processAI(params, dt)

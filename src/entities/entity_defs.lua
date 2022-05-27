@@ -48,6 +48,7 @@ ENTITY_DEFS = {
 
     ['dog'] = {
         walkSpeed = ENTITY_WALK_SPEED,
+        dialogueText = 'Arf! arf!',
         animations = {
             ['walk-down'] = {
                 frames = {1, 2, 3},
@@ -90,6 +91,8 @@ ENTITY_DEFS = {
 
     ['female-warrior'] = {
         walkSpeed = ENTITY_WALK_SPEED,
+        dialogueText = 'The lands south of here are dangerous. They are filled with' .. 
+                        ' monsters who will ambush you without warning. Be wary traveller.',
         animations = {
             ['walk-down'] = {
                 frames = {1, 2, 3},
@@ -132,6 +135,9 @@ ENTITY_DEFS = {
 
     ['male-priest'] = {
         walkSpeed = ENTITY_WALK_SPEED,
+        dialogueText = 'Do you see that house nearby? That\'s where I live.' ..
+                        ' You shouldn\'t try to go inside, though. That area has' ..
+                        'n\'t been implemented yet. A blue screen awaits.',
         animations = {
             ['walk-down'] = {
                 frames = {1, 2, 3},
@@ -174,6 +180,8 @@ ENTITY_DEFS = {
 
     ['male-young'] = {
         walkSpeed = ENTITY_WALK_SPEED,
+        dialogueText = 'Hey mister, there seems to be monsters around these parts.' ..
+                        ' If you ever need to restore your health, come to me.',
         animations = {
             ['walk-down'] = {
                 frames = {1, 2, 3},
@@ -216,6 +224,7 @@ ENTITY_DEFS = {
 
     ['grandma'] = {
         walkSpeed = ENTITY_WALK_SPEED,
+        dialogueText = 'What can I do for you, sonny?',
         animations = {
             ['walk-down'] = {
                 frames = {1, 2, 3},

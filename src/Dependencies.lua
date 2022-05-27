@@ -19,10 +19,16 @@ require 'src/Animation'
 require 'src/Doorway'
 require 'src/world/GameArea'
 require 'src/world/GameArea_Defs'
+require 'src/gui/Menu'
+require 'src/gui/Panel'
+require 'src/gui/ProgressBar'
+require 'src/gui/Selection'
+require 'src/gui/Textbox'
 require 'src/states/BaseState'
 require 'src/states/FieldState'
 require 'src/states/FadeInState'
 require 'src/states/FadeOutState'
+require 'src/states/DialogueState'
 require 'src/entities/entity_defs'
 require 'src/entities/Entity'
 require 'src/entities/Player'
@@ -56,4 +62,14 @@ gSounds = {
     ['hit-enemy'] = love.audio.newSource('sounds/hit_enemy.wav', 'static'),
     ['hit-player'] = love.audio.newSource('sounds/hit_player.wav', 'static'),
     ['door'] = love.audio.newSource('sounds/door.wav', 'static')
+}
+
+gFonts = {
+    ['small'] = love.graphics.newFont('fonts/font.ttf', 8),
+    ['medium'] = love.graphics.newFont('fonts/font.ttf', 16),
+    ['large'] = love.graphics.newFont('fonts/font.ttf', 32),
+    ['gothic-medium'] = love.graphics.newFont('fonts/GothicPixels.ttf', 16),
+    ['gothic-large'] = love.graphics.newFont('fonts/GothicPixels.ttf', 32),
+    ['zelda'] = love.graphics.newFont('fonts/zelda.otf', 64),
+    ['zelda-medium'] = love.graphics.newFont('fonts/zelda.otf', 16)
 }

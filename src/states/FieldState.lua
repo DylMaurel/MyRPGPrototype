@@ -48,7 +48,7 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
             table.insert(self.collidables, collidable)
         end
     end
-    -- Create table of all non-player entities in the area. 
+    -- Create a table of all non-player entities in the area. 
     self.entities = {}
     self:generateEntities()
 
@@ -141,9 +141,10 @@ function FieldState:update(dt)
             queryY = queryY + self.player.height * CHARACTER_SCALE
         end
         self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
-        local colliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
-        if #colliders > 0 then
-            local doorway = colliders[1]:getObject()
+        -- Check for interacting with a doorway
+        local doorColliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
+        if #doorColliders > 0 then
+            local doorway = doorColliders[1]:getObject()
             -- make sure the player is facing the proper direction to enter the door.
             if (self.player.direction == doorway.direction) and doorway.type == 'closed' then
                 gSounds['door']:play()
@@ -163,6 +164,23 @@ function FieldState:update(dt)
                     end
                 ))
             end
+        end
+        -- Check for interacting with an entity
+        local entityColliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Entity'})
+        if #entityColliders > 0 then
+            local entity = entityColliders[1]:getObject()
+            -- make the entity face the player
+            if self.player.direction == 'left' then
+                entity.direction = 'right'
+            elseif self.player.direction == 'right' then
+                entity.direction = 'left'
+            elseif self.player.direction == 'up' then
+                entity.direction = 'down'
+            else
+                entity.direction = 'up'
+            end
+            entity:changeState('idle')
+            entity:onInteract()
         end
     end
     FieldState:updateCamera(self)
@@ -199,7 +217,8 @@ function FieldState:generateEntities()
         for _, obj in pairs(self.gameArea.map.layers['entity-locations'].objects) do
             local entity = Entity(
                 {animations = ENTITY_DEFS[obj.properties.entityName].animations,
-                width = 16, height = 16, x = obj.x, y = obj.y})
+                width = 16, height = 16, x = obj.x, y = obj.y,
+                dialogueText = ENTITY_DEFS[obj.properties.entityName].dialogueText})
 
             entity.stateMachine = StateMachine {
                 ['walk'] = function() return EntityWalkState(entity, self) end,
@@ -217,7 +236,7 @@ function FieldState:generateEntities()
             -- with something, but before the collision response is actually calculated.
             entity.collider:setPreSolve(function(collider_1, collider_2, contact)
                 if collider_1.collision_class == 'Player' and collider_2.collision_class == 'Entity' then
-                    -- Setting the entity's velocity to zero just before the collision will make sure
+                    -- Setting the entity's velocity to zero just before the collision-calculation will make sure
                     -- that the entity does not push the player. Also, the entity conveniently stops moving.
                     collider_2:setLinearVelocity(0,0)
                     local obj = collider_2:getObject()
@@ -228,10 +247,9 @@ function FieldState:generateEntities()
                     obj:changeState('idle')
                 end
             end)
-            -- By setting the entity object to its collider, we are able to retrieve the object
-            -- whenever the physicsWorld
+            -- By setting the entity object to its collider, we are able to retrieve the entity object
+            -- later on whenever things happen to the collider in the the physicsWorld.
             entity.collider:setObject(entity)
-
             table.insert(self.entities, entity)
         end
     end

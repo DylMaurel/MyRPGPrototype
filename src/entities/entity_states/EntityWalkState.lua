@@ -48,7 +48,7 @@ function EntityWalkState:processAI(params, dt)
 
         -- chance to go idle
         if math.random() <= 0.75 then
-            self.entity.collider:setLinearVelocity(0, 0)
+            --self.entity.collider:setLinearVelocity(0, 0)
             self.entity:changeState('idle')
         else
             self.moveDuration = math.random()

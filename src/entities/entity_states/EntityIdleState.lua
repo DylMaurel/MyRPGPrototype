@@ -7,7 +7,9 @@ EntityIdleState = Class{__includes = BaseState}
 
 function EntityIdleState:init(entity)
     self.entity = entity
-
+    if self.entity.collider then
+        self.entity.collider:setLinearVelocity(0, 0)
+    end
     self.entity:changeAnimation('idle-' .. self.entity.direction)
 
     -- used for AI waiting
@@ -40,7 +42,6 @@ function EntityIdleState:processAI(params, dt)
                 end
             end
         end
-
 
         if self.waitTimer > self.waitDuration then
             if math.random(2) == 1 then
