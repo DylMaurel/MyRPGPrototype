@@ -35,8 +35,8 @@ function Selection:update(dt)
             self.currentSelection = self.currentSelection - 1
         end
         
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
+        -- gSounds['blip']:stop()
+        -- gSounds['blip']:play()
     elseif love.keyboard.wasPressed('down') then
         if self.currentSelection == #self.items then
             self.currentSelection = 1
@@ -44,13 +44,13 @@ function Selection:update(dt)
             self.currentSelection = self.currentSelection + 1
         end
         
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
+        -- gSounds['blip']:stop()
+        -- gSounds['blip']:play()
     elseif love.keyboard.wasPressed('return') or love.keyboard.wasPressed('enter') then
         self.items[self.currentSelection].onSelect()
         
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
+        -- gSounds['blip']:stop()
+        -- gSounds['blip']:play()
     end
 end
 

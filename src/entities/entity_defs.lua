@@ -48,7 +48,11 @@ ENTITY_DEFS = {
 
     ['dog'] = {
         walkSpeed = ENTITY_WALK_SPEED,
-        dialogueText = 'Arf! arf!',
+        dialogues = {
+            [1] = {
+               text = 'Arf! arf!',
+            }
+        },
         movesAround = true,
         animations = {
             ['walk-down'] = {
@@ -92,8 +96,12 @@ ENTITY_DEFS = {
 
     ['female-warrior'] = {
         walkSpeed = ENTITY_WALK_SPEED,
-        dialogueText = 'The lands south of here are dangerous. They are filled with' .. 
-                        ' monsters who will ambush you without warning. Be wary traveller.',
+        dialogues = {
+            [1] = {
+                text = 'The lands south of here are dangerous. They are filled with' .. 
+                ' monsters who will ambush you without warning. Be wary traveller.',
+                }
+        },
         movesAround = true,
         animations = {
             ['walk-down'] = {
@@ -137,9 +145,14 @@ ENTITY_DEFS = {
 
     ['male-priest'] = {
         walkSpeed = ENTITY_WALK_SPEED,
-        dialogueText = 'Do you see that house nearby? That\'s where I live.' ..
-                        ' You shouldn\'t try to go inside, though. That area has' ..
-                        'n\'t been implemented yet. A blue screen awaits.',
+        dialogues = {
+            [1] = {
+                text = 'Do you see that house nearby? That\'s where I live.' ..
+                ' You shouldn\'t try to go inside, though. That area has' ..
+                'n\'t been implemented yet. A blue screen awaits.',
+                isQuestion = false
+                }
+        },
         movesAround = true,
         animations = {
             ['walk-down'] = {
@@ -183,8 +196,37 @@ ENTITY_DEFS = {
 
     ['male-young'] = {
         walkSpeed = ENTITY_WALK_SPEED,
-        dialogueText = 'Hey mister, there seems to be monsters around these parts.' ..
-                        ' If you ever need to restore your health, come to me.',
+        dialogues = {
+            [1] = {
+                text = 'Hey mister, there seems to be monsters around these parts.',
+                isQuestion = false
+            },
+            [2] = {
+                text = 'Would you like some health potions?',
+                isQuestion = true,
+                answers = {
+                    [1] = 'Yes',
+                    [2] = 'No'
+                }, 
+                -- A response to a player's answer will open up a new dialogue state in a recursive-ish manner.
+                -- So, a response must be formatted in the same way that a dialogue is formatted.
+                -- That is, the dialogues table and the responses table have the same format.
+                responses = {
+                    [1] = { -- this response is linked to answer 1 because they both have an index of 1
+                        [1] = {
+                        text = 'Okay, here are the potions.',
+                        isQuestion = false
+                        }
+                    },
+                    [2] = { -- this response is linked to answer 2 because they both have an index of 2
+                        [1] = {
+                        text = 'Okay, maybe next time.',
+                        isQuestion = false
+                        }
+                    }
+                }
+            }
+        },
         movesAround = false,
         animations = {
             ['walk-down'] = {
@@ -228,7 +270,12 @@ ENTITY_DEFS = {
 
     ['grandma'] = {
         walkSpeed = ENTITY_WALK_SPEED,
-        dialogueText = 'What can I do for you, sonny?',
+        dialogues = {
+            [1] = {
+                text = 'What can I do for you, sonny?',
+                isQuestion = false
+                }
+        },
         movesAround = true,
         animations = {
             ['walk-down'] = {

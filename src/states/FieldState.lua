@@ -168,10 +168,10 @@ function FieldState:render()
             entity:render()
         end
         self.player:render()
-        self.physicsWorld:draw()
-        if self.queryCircle then
-            love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
-        end
+        --self.physicsWorld:draw()
+        -- if self.queryCircle then
+        --     love.graphics.circle("line",self.queryCircle.x,self.queryCircle.y,self.queryCircle.radius)
+        -- end
 
         if self.gameArea.map.layers['render-last'] then
             self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
@@ -189,7 +189,7 @@ function FieldState:generateEntities()
             local entity = Entity(
                 {animations = ENTITY_DEFS[obj.properties.entityName].animations,
                 width = 16, height = 16, x = obj.x, y = obj.y,
-                dialogueText = ENTITY_DEFS[obj.properties.entityName].dialogueText,
+                dialogues = ENTITY_DEFS[obj.properties.entityName].dialogues,
                 movesAround = ENTITY_DEFS[obj.properties.entityName].movesAround})
 
             entity.stateMachine = StateMachine {
