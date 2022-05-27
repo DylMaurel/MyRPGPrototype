@@ -737,7 +737,7 @@ return {
             ["direction"] = "down",
             ["isDoorway"] = true,
             ["name"] = "bottom-exit",
-            ["type"] = "open"
+            ["type"] = "closed"
           }
         },
         {

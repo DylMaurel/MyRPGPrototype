@@ -11,6 +11,7 @@ function Entity:init(def)
     self.dialogueText = def.dialogueText
     self.width = def.width
     self.height = def.height
+    self.movesAround = def.movesAround
 
     self.x = def.x or 0
     self.y = def.y or 0

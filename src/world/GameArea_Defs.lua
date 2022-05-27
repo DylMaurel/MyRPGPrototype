@@ -24,6 +24,10 @@ GAME_AREA_DEFS = {
             ['inn-door'] = {
                 area = 'house-interior',
                 otherDoor = 'exit' 
+            },
+            ['bottom-exit'] = {
+                area = 'forest',
+                otherDoor = 'exit'
             }
         }
     },
@@ -51,5 +55,29 @@ GAME_AREA_DEFS = {
                 otherDoor = 'inn-door' 
             }
         }
-    }
+    },
+
+    ['forest'] = {
+        filepath = 'maps/forestMap.lua',
+        width = 30,
+        height = 27,
+        areaName = 'forest',
+        showBlackSpace = false,
+        -- The optional layer called "render-last" should not be listed here,
+        -- since the layers listed here are only the ones that will be rendered
+        -- in GameArea.lua
+        tileLayers = {
+            [1] = "ground",
+            [2] = "ground-objects1",
+            [3] = "ground-objects2",
+        },
+        -- We need to define the area that each door connects to, as well as
+        -- the name of the door in the next area that connects to this door.
+        doorways = {
+            ['exit'] = {
+                area = 'town-area',
+                otherDoor = 'bottom-exit' 
+            }
+        }
+    },
 }

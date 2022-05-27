@@ -25,6 +25,11 @@ end
     we can use this same state in our Player class and have it not take action.
 ]]
 function EntityIdleState:processAI(params, dt)
+    if self.entity.movesAround == false then
+        return
+    end
+    
+
     if self.waitDuration == 0 then
         self.waitDuration = math.random(5)
     else

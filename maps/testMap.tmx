@@ -160,7 +160,7 @@
     <property name="direction" value="down"/>
     <property name="isDoorway" type="bool" value="true"/>
     <property name="name" value="bottom-exit"/>
-    <property name="type" value="open"/>
+    <property name="type" value="closed"/>
    </properties>
   </object>
   <object id="49" x="0" y="257" width="8" height="46">

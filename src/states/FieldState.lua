@@ -2,13 +2,11 @@
     MyRPG Prototype
     FieldState.lua
 
-    A FieldState is meant to encapsulate the state of a free-roaming
-    game area by containing a player, objects, entities, and a tilemap
-    for the area.
-    We also wnat to provide the ability to create multiple FieldStates
-    on top of each other. For example, A FieldState for a town area can
-    be pushed to the StateStack, and then another FieldState can be created
-    and pushed for the  interior of a building in the town.
+    A FieldState is meant to encapsulate the state of free-roaming within
+    a game area by containing a player, objects, entities, and a tilemap
+    for the area. The FieldState determines all the actions that the player
+    can make within this state.
+    
 
     A Box2D physics world handles all collisions within a FieldState.
     We are using Windfield, a library that wraps LÖVE's physics API so that
@@ -23,31 +21,8 @@ FieldState = Class{__includes = BaseState}
 -- will have to be modified to take in the gameArea as an argument
 function FieldState:init(areaName, arrivalDoorName, playerDir)
     self.gameArea = GameArea(GAME_AREA_DEFS[areaName])
-    self.physicsWorld = Windfield.newWorld(0,0)
-    self.collidables = {}
-    self.doorways = {}
-    self.physicsWorld:addCollisionClass('Doorway')
 
-    if self.gameArea.map.layers['collidables'] then
-        -- Loop through all the objects we created for the map in Tiled, and
-        -- create physics colliders for each one.
-        for i, obj in pairs(self.gameArea.map.layers['collidables'].objects) do
-            local collidable = self.physicsWorld:newRectangleCollider(
-                obj.x, obj.y, obj.width, obj.height)
-            collidable:setType('static')
-
-            if obj.properties.isDoorway then
-                local doorway = Doorway(
-                    {x=obj.x, y=obj.y, width=obj.width, height=obj.height,
-                    direction = obj.properties.direction, type = obj.properties.type,
-                    name = obj.properties.name, fadeColor = obj.properties.fadeColor})
-                self.doorways[doorway.name] = doorway
-                collidable:setCollisionClass('Doorway')
-                collidable:setObject(doorway)
-            end
-            table.insert(self.collidables, collidable)
-        end
-    end
+    self.physicsWorld, self.doorways = self.gameArea:createPhysicsWorld()
     -- Create a table of all non-player entities in the area. 
     self.entities = {}
     self:generateEntities()
@@ -204,10 +179,6 @@ function FieldState:render()
 
         --love.graphics.draw(gTextures['female-warrior'], gFrames['female-warrior'][1], 271, 344, 0, 0.7, 0.7)
     self.cam:detach()
-    
-    
-   
-    
 end
 
 
@@ -218,7 +189,8 @@ function FieldState:generateEntities()
             local entity = Entity(
                 {animations = ENTITY_DEFS[obj.properties.entityName].animations,
                 width = 16, height = 16, x = obj.x, y = obj.y,
-                dialogueText = ENTITY_DEFS[obj.properties.entityName].dialogueText})
+                dialogueText = ENTITY_DEFS[obj.properties.entityName].dialogueText,
+                movesAround = ENTITY_DEFS[obj.properties.entityName].movesAround})
 
             entity.stateMachine = StateMachine {
                 ['walk'] = function() return EntityWalkState(entity, self) end,
@@ -256,17 +228,15 @@ function FieldState:generateEntities()
 
 end
 
---
--- Even though this method is better suited to be private, the StateStack and StateMachine
--- are the only other classes where methods are called on a state. So I don't think it's a big deal.
+-- 
 --
 function FieldState:updateCamera(self)
     -- We now need to make the camera track the player.
     local halfWindowWidth = love.graphics.getWidth() / 2
     local halfWindowHeight = love.graphics.getHeight() / 2
     -- Making the camera look at (love.graphics.getWidth() / 2, love.graphics.getHeight() / 2) will
-    -- fix the camera in the top left of the screen. This is how the camera library is implemented. 
-    -- The rest of the calculation will position the camera to have the player in the center.
+    -- fix the camera in the top left of the screen--because that's how the camera library is implemented. 
+    -- The rest of the lookAt calculation will position the camera to have the player in the center.
     -- 11 is about the width and height of the player when the player sprite is scaled by 0.7.
     self.cam:lookAt(math.floor(halfWindowWidth + self.player.x - VIRTUAL_WIDTH / 2 + 11),
                    math.floor(halfWindowHeight + self.player.y - VIRTUAL_HEIGHT / 2 + 11))
