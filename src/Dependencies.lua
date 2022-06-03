@@ -39,14 +39,14 @@ require 'src/entities/entity_states/PlayerIdleState'
 require 'src/entities/entity_states/PlayerWalkState'
 
 gTextures = {
-    -- player
     ['player-walk'] = love.graphics.newImage('graphics/Male 14-1.png'),
     ['dog'] = love.graphics.newImage('graphics/Dog 01-3.png'),
     ['female-warrior'] = love.graphics.newImage('graphics/Female 02-1.png'),
     ['grandma'] = love.graphics.newImage('graphics/Female 19-3.png'),
     ['male-priest'] = love.graphics.newImage('graphics/Male 08-4.png'),
     ['male-young'] = love.graphics.newImage('graphics/Male 10-3.png'),
-    ['cursor'] = love.graphics.newImage('graphics/cursor.png')
+    ['cursor'] = love.graphics.newImage('graphics/cursor.png'),
+    ['combat-forest'] = love.graphics.newImage('graphics/battle_backgrounds/battleback1.png')
 }
 
 gFrames = {
@@ -58,12 +58,24 @@ gFrames = {
     ['male-young'] = GenerateQuads(gTextures['male-young'], 32, 32)
 }
 
+-- All the combat textures can be split into 150pixel x 150pixel quads, but some of the
+-- sprites are bigger than others (e.g. the attack sprite is bigger than the idle sprite).
+-- To deal with this, the quads can be drawn at an offset, so that when they are drawn,
+-- the x, y coordinates will denote the center of the quad instead of the top left corner.
+-- Also, all combat sprites will have to be scaled down whenever they are drawn.
+gCombatSprites = {
+    ['player-idle'] = love.graphics.newImage('graphics/player_combat/Idle.png')
+}
+gCombatFrames = {
+    ['player-idle'] = GenerateQuads(gCombatSprites['player-idle'], 150, 150)
+}
+
 gSounds = {
-    ['music'] = love.audio.newSource('sounds/music.mp3', 'static'),
     ['sword'] = love.audio.newSource('sounds/sword.wav', 'static'),
     ['hit-enemy'] = love.audio.newSource('sounds/hit_enemy.wav', 'static'),
     ['hit-player'] = love.audio.newSource('sounds/hit_player.wav', 'static'),
-    ['door'] = love.audio.newSource('sounds/door.wav', 'static')
+    ['door'] = love.audio.newSource('sounds/door.wav', 'static'),
+    ['rpg-music'] = love.audio.newSource('sounds/tiny-rpg-town.wav', 'static')
 }
 
 gFonts = {

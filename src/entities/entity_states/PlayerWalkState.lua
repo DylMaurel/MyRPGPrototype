@@ -3,6 +3,8 @@ PlayerWalkState = Class{__includes = EntityWalkState}
 function PlayerWalkState:init(player, gameArea)
     self.player = player
     self.gameArea = gameArea
+    self.player.isWalking = true
+    self.player.isIdle = false
 end
 
 function PlayerWalkState:update(dt)

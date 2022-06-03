@@ -30,6 +30,11 @@ function love.load()
     gStateStack:push(FieldState('town-area', 'inn-door', 'down'))
 
     love.keyboard.keysPressed = {}
+
+    -- In the future, background music could be managed by some sort of music manager class,
+    -- instead of just having one song always being played the whole time.
+    gSounds['rpg-music']:setLooping(true)
+    gSounds['rpg-music']:play()
 end
 
 

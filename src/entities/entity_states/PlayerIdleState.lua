@@ -4,6 +4,8 @@ PlayerIdleState = Class{__includes = EntityIdleState}
 
 function PlayerIdleState:init(entity)
     EntityIdleState.init(self, entity)
+    self.entity.isIdle = true
+    self.entity.isWalking = false
 end
 
 function PlayerIdleState:update(dt)

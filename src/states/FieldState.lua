@@ -21,8 +21,24 @@ FieldState = Class{__includes = BaseState}
 -- will have to be modified to take in the gameArea as an argument
 function FieldState:init(areaName, arrivalDoorName, playerDir)
     self.gameArea = GameArea(GAME_AREA_DEFS[areaName])
-
     self.physicsWorld, self.doorways = self.gameArea:createPhysicsWorld()
+
+    self.enemySpawnTimer = {} -- this table is used to create a timer group for spawning enemies.
+    -- This timer belongs to a group that will only be updated if the game area contains
+    -- enemies and if the player is walking.
+    Timer.every(3, function()
+        if math.random(2) == 1 then
+            gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+            function()
+                --gStateStack:push(BattleState())
+                gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+            end
+        ))
+        end
+    end
+    ):group(self.enemySpawnTimer)
+    
+
     -- Create a table of all non-player entities in the area. 
     self.entities = {}
     self:generateEntities()
@@ -122,7 +138,7 @@ function FieldState:update(dt)
             local doorway = doorColliders[1]:getObject()
             -- make sure the player is facing the proper direction to enter the door.
             if (self.player.direction == doorway.direction) and doorway.type == 'closed' then
-                gSounds['door']:play()
+                --gSounds['door']:play()
                 -- Remove the current FieldState from the StateStack.
                 -- In the future, we could call some function here that saves game data.
                 gStateStack:push(FadeInState( doorway.fadeColor, 0.5,
@@ -158,6 +174,13 @@ function FieldState:update(dt)
             entity:onInteract()
         end
     end
+
+    -- Chance to start a battle if the area contains enemies and the player is walking.
+    if self.gameArea.map.properties.containsEnemies and self.player.isWalking then
+        Timer.update(dt, self.enemySpawnTimer)
+    end
+
+
     FieldState:updateCamera(self)
 end
 
@@ -177,8 +200,11 @@ function FieldState:render()
             self.gameArea.map:drawLayer(self.gameArea.map.layers["render-last"])
         end
 
-        --love.graphics.draw(gTextures['female-warrior'], gFrames['female-warrior'][1], 271, 344, 0, 0.7, 0.7)
+       
+        --love.graphics.draw(gTextures['combat-forest'],0,0, 0, 0.35,0.35)
+        --love.graphics.draw(gCombatSprites['player-idle'],gCombatFrames['player-idle'][1],0,0, 0, 1, 1, 75, 75)
     self.cam:detach()
+    
 end
 
 
