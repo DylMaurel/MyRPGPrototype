@@ -9,14 +9,19 @@ function CombatEntity:init(def)
     self.flipped = def.flipped or false
     self.animations = self:createAnimations(def.animations)
     self.drawOffset = def.drawOffset
-    self.health = 10
+    self.health = def.health or 10
     
     -- self.width = def.width
     -- self.height = def.height
-
     self.x = def.x or 0
     self.y = def.y or 0
-    
+
+    -- These coordinates are the positions that the entity stands throughout the battle.
+    -- These variables will be initialized when BattleState:calcEntityPositions() is called.
+    -- We must remember these variables because an entity's x and y can move when they are
+    -- attacking, and we need a way for them to return to their original position.
+    self.standingX = nil
+    self.standingY = nil
 end
 
 -- function CombatEntity:changeState(name)
@@ -34,7 +39,8 @@ function CombatEntity:createAnimations(animations)
         animationsReturned[k] = Animation {
             texture = animationDef.texture,
             frames = animationDef.frames,
-            interval = animationDef.interval
+            interval = animationDef.interval,
+            looping = animationDef.looping
         }
     end
 

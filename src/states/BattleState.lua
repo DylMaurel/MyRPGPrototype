@@ -11,31 +11,30 @@ BattleState = Class{__includes = BaseState}
 function BattleState:init(player)
     self.player = player
     self.playerParty = {
-        [1] = CombatEntity (COMBAT_ENTITY_DEFS['player'])
+        [1] = CombatEntity (COMBAT_ENTITY_DEFS['player']),
+        [2] = CombatEntity(COMBAT_ENTITY_DEFS['samurai'])
     }
     --self.bottomPanel = Panel(0, VIRTUAL_HEIGHT - 64, VIRTUAL_WIDTH, 64)
 
     -- flag for when the battle can take input, set in the first update call
     self.battleStarted = false
 
-    self.opponentParty = {
-        [1] = CombatEntity(COMBAT_ENTITY_DEFS['samurai']),
-        [2] = CombatEntity(COMBAT_ENTITY_DEFS['samurai'])
-    }
+    local enemies = {[1] = 'skeleton', [2] = 'goblin'}
+    self.opponentParty = {}
+    for i=1, math.random(4) do
+        self.opponentParty[i] = CombatEntity(COMBAT_ENTITY_DEFS[enemies[math.random(2)]])
+    end
 
-    self.playerParty[1].x = VIRTUAL_WIDTH * 0.75
-    self.playerParty[1].y = VIRTUAL_HEIGHT / 2
-
-    self.opponentParty[1].x = VIRTUAL_WIDTH * 0.25 + 8
-    self.opponentParty[1].y = VIRTUAL_HEIGHT / 2 - 16
-    self.opponentParty[2].x = VIRTUAL_WIDTH * 0.25
-    self.opponentParty[2].y = VIRTUAL_HEIGHT / 2 + 16
+    self:calcEntityPositions(32, 16, VIRTUAL_WIDTH * 0.75, VIRTUAL_HEIGHT / 2, self.playerParty)
+    self:calcEntityPositions(32, -16, VIRTUAL_WIDTH * 0.25, VIRTUAL_HEIGHT / 2, self.opponentParty)
 
     for _, entity in pairs(self.playerParty) do
         entity:changeAnimation('idle')
+        entity.x = entity.x + 150 -- begin off screen
     end
     for _, entity in pairs(self.opponentParty) do
         entity:changeAnimation('idle')
+        entity.x = entity.x - 150 -- begin off screen
     end
 
     -- self.playerSprite = BattleSprite(self.player.party.pokemon[1].battleSpriteBack, 
@@ -98,15 +97,24 @@ end
 
 function BattleState:update(dt)
     -- this will trigger the first time this state is actively updating on the stack
-    -- if not self.battleStarted then
-    --     self:triggerSlideIn()
-    -- end
+    if not self.battleStarted then
+        self:triggerSlideIn()
+    end
 
     for _, entity in pairs(self.playerParty) do
         entity:update(dt)
     end
     for _, entity in pairs(self.opponentParty) do
         entity:update(dt)
+    end
+
+    if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') then
+        gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+        function()
+            gStateStack:pop()
+            gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+        end
+    ))
     end
 end
 
@@ -121,6 +129,7 @@ function BattleState:render()
     love.graphics.draw(gTextures['combat-forest'],0,0, 0, 0.35,0.35)
 
     for _, entity in ipairs(self.playerParty) do
+        -- add the shadows to the combat entity class instead of coding the shadows here.
         love.graphics.setColor(20/255, 20/255, 80/255, 180/255)
         love.graphics.ellipse('fill', entity.x, entity.y + 18, 12, 6)
          love.graphics.setColor(1, 1, 1, 1)
@@ -152,19 +161,62 @@ function BattleState:render()
     -- self.bottomPanel:render()
 end
 
+
+function BattleState:calcEntityPositions(vertSpacing, horizSpacing, middleX, middleY, party)
+    
+    local numPlayerParty = #party
+    -- if we have an odd number of entities in the party, then
+    if numPlayerParty % 2 == 1 then
+        -- find the position for the topmost entity in the party
+        party[1].y = middleY - ((numPlayerParty - 1) / 2) * vertSpacing
+        party[1].x = middleX - ((numPlayerParty - 1) / 2) * horizSpacing
+        party[1].standingX = party[1].x
+        party[1].standingY = party[1].y
+        if numPlayerParty > 1 then
+            -- find the positions for the rest of the entities in the party
+            for i=2, numPlayerParty do
+                party[i].y = party[i-1].y + vertSpacing
+                party[i].x = party[i-1].x + horizSpacing
+                party[i].standingX = party[i].x -- Store these positions in a separate member
+                party[i].standingY = party[i].y -- variable so that we can return back to them later.
+            end
+        end
+    else -- we have an even number of entities in the party
+        -- Find the position of the topmost entity
+        party[1].y = middleY - (vertSpacing / 2) - ((numPlayerParty - 2) / 2) * vertSpacing
+        party[1].x = middleX - (horizSpacing / 2) - ((numPlayerParty - 2) / 2) * horizSpacing
+        party[1].standingX = party[1].x
+        party[1].standingY = party[1].y
+        for i = 2, numPlayerParty do
+            -- Find the positions for the other entities--based on where the topmost entity is.
+            party[i].y = party[i-1].y + vertSpacing
+            party[i].x = party[i-1].x + horizSpacing
+            party[i].standingX = party[i].x -- Store these positions in a separate member
+            party[i].standingY = party[i].y -- variable so that we can return back to them later.
+        end
+    end
+end
+
 function BattleState:triggerSlideIn()
     self.battleStarted = true
 
     -- slide the sprites and circles in from the edges, then trigger first dialogue boxes
-    Timer.tween(1, {
-        [self.playerSprite] = {x = 32},
-        [self.opponentSprite] = {x = VIRTUAL_WIDTH - 96},
-        [self] = {playerCircleX = 66, opponentCircleX = VIRTUAL_WIDTH - 70}
-    })
-    :finish(function()
-        self:triggerStartingDialogue()
-        self.renderHealthBars = true
-    end)
+    for _, entity in pairs(self.opponentParty) do 
+        Timer.tween(1, {
+            [entity] = {x = entity.standingX}
+        })
+        :finish(function()
+        end)
+    end
+    for _, entity in pairs(self.playerParty) do 
+        Timer.tween(1, {
+            [entity] = {x = entity.standingX}
+        })
+        :finish(function()
+            -- self:triggerStartingDialogue()
+            -- self.renderHealthBars = true
+        end)
+    end
 end
 
 function BattleState:triggerStartingDialogue()

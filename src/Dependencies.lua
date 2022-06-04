@@ -79,12 +79,20 @@ gCombatSprites = {
     ['player-attack1'] = love.graphics.newImage('graphics/player_combat/Attack1.png'),
     ['samurai-idle'] = love.graphics.newImage('graphics/samurai_combat/Idle.png'),
     ['samurai-attack1'] = love.graphics.newImage('graphics/samurai_combat/Attack1.png'),
+    ['skeleton-idle'] = love.graphics.newImage('graphics/skeleton_combat/Idle.png'),
+    ['skeleton-attack'] = love.graphics.newImage('graphics/skeleton_combat/Attack.png'),
+    ['goblin-idle'] = love.graphics.newImage('graphics/goblin_combat/Idle.png'),
+    ['goblin-attack'] = love.graphics.newImage('graphics/goblin_combat/Attack.png')
 }
 gCombatFrames = {
     ['player-idle'] = GenerateQuads(gCombatSprites['player-idle'], 150, 150),
     ['player-attack1'] = GenerateQuads(gCombatSprites['player-attack1'], 150, 150),
     ['samurai-idle'] = GenerateQuads(gCombatSprites['samurai-idle'], 200, 200),
-    ['samurai-attack1'] = GenerateQuads(gCombatSprites['samurai-attack1'], 200, 200)
+    ['samurai-attack1'] = GenerateQuads(gCombatSprites['samurai-attack1'], 200, 200),
+    ['skeleton-idle'] = GenerateQuads(gCombatSprites['skeleton-idle'], 150, 150),
+    ['skeleton-attack'] = GenerateQuads(gCombatSprites['skeleton-attack'], 150, 150),
+    ['goblin-idle'] = GenerateQuads(gCombatSprites['goblin-idle'], 150, 150),
+    ['goblin-attack'] = GenerateQuads(gCombatSprites['goblin-attack'], 150, 150),
 }
 
 gSounds = {

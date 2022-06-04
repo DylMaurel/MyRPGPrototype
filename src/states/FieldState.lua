@@ -33,7 +33,7 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
                 gStateStack:push(BattleState())
                 gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
             end
-        ))
+            ))
         end
     end
     ):group(self.enemySpawnTimer)
