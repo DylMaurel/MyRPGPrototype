@@ -30,7 +30,7 @@ function FieldState:init(areaName, arrivalDoorName, playerDir)
         if math.random(2) == 1 then
             gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
             function()
-                --gStateStack:push(BattleState())
+                gStateStack:push(BattleState())
                 gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
             end
         ))
