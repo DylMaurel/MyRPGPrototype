@@ -9,7 +9,10 @@ function CombatEntity:init(def)
     self.flipped = def.flipped or false
     self.animations = self:createAnimations(def.animations)
     self.drawOffset = def.drawOffset
-    self.health = def.health or 10
+    self.shadow = def.shadow
+    self.HP = def.HP or 100
+    self.currentHP = self.HP
+
     
     -- self.width = def.width
     -- self.height = def.height
@@ -30,6 +33,10 @@ end
 
 function CombatEntity:changeAnimation(name)
     self.currentAnimation = self.animations[name]
+end
+
+function CombatEntity:timesAnimationPlayed()
+    return self.currentAnimation.timesPlayed
 end
 
 function CombatEntity:createAnimations(animations)
@@ -53,8 +60,16 @@ function CombatEntity:update(dt)
 end
 
 function CombatEntity:render()
+    -- render shadow
+    love.graphics.setColor(10/255, 10/255, 30/255, 100/255)
+    love.graphics.ellipse('fill', math.floor(self.x + self.shadow.offsetX),
+        math.floor(self.y + self.shadow.offsetY), self.shadow.width, self.shadow.height)
+    love.graphics.setColor(1, 1, 1, 1)
+
+    -- render sprite
     local anim = self.currentAnimation
     local scaleX = self.flipped and -1 or 1
     love.graphics.draw(gCombatSprites[anim.texture], gCombatFrames[anim.texture][anim:getCurrentFrame()],
         math.floor(self.x), math.floor(self.y), 0, scaleX, 1, self.drawOffset, self.drawOffset)
+
 end

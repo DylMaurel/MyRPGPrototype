@@ -27,7 +27,14 @@ function love.load()
     gStateStack = StateStack()
     -- Specify which area needs to be loaded in the FieldState. Also specify the
     -- starting position of the player.
-    gStateStack:push(FieldState('town-area', 'inn-door', 'down'))
+
+    --gStateStack:push(FieldState('town-area', 'inn-door', 'down'))
+    gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+    function()
+        gStateStack:push(BattleState())
+        gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+    end
+    ))
 
     love.keyboard.keysPressed = {}
 

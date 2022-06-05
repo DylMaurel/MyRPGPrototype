@@ -1,9 +1,7 @@
 --[[
-    GD50
-    Pokemon
+    My RPG Prototype
 
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
+    Author: Dylan Maurel
 ]]
 
 BattleState = Class{__includes = BaseState}
@@ -14,7 +12,6 @@ function BattleState:init(player)
         [1] = CombatEntity (COMBAT_ENTITY_DEFS['player']),
         [2] = CombatEntity(COMBAT_ENTITY_DEFS['samurai'])
     }
-    --self.bottomPanel = Panel(0, VIRTUAL_HEIGHT - 64, VIRTUAL_WIDTH, 64)
 
     -- flag for when the battle can take input, set in the first update call
     self.battleStarted = false
@@ -23,67 +20,47 @@ function BattleState:init(player)
     self.opponentParty = {}
     for i=1, math.random(4) do
         self.opponentParty[i] = CombatEntity(COMBAT_ENTITY_DEFS[enemies[math.random(2)]])
+        self.opponentParty[i].showHP = true
     end
 
-    self:calcEntityPositions(32, 16, VIRTUAL_WIDTH * 0.75, VIRTUAL_HEIGHT / 2, self.playerParty)
-    self:calcEntityPositions(32, -16, VIRTUAL_WIDTH * 0.25, VIRTUAL_HEIGHT / 2, self.opponentParty)
+    self:calcEntityPositions(32, 16, VIRTUAL_WIDTH * 0.79, VIRTUAL_HEIGHT / 2, self.playerParty)
+    self:calcEntityPositions(32, -16, VIRTUAL_WIDTH * 0.21, VIRTUAL_HEIGHT / 2, self.opponentParty)
 
     for _, entity in pairs(self.playerParty) do
-        entity:changeAnimation('idle')
-        entity.x = entity.x + 150 -- begin off screen
+        entity:changeAnimation('run')
+        entity.x = VIRTUAL_WIDTH + 24 -- begin off screen
     end
     for _, entity in pairs(self.opponentParty) do
-        entity:changeAnimation('idle')
-        entity.x = entity.x - 150 -- begin off screen
+        entity:changeAnimation('run')
+        entity.x = 0 - 24 -- begin off screen
     end
 
-    -- self.playerSprite = BattleSprite(self.player.party.pokemon[1].battleSpriteBack, 
-    --     -64, VIRTUAL_HEIGHT - 128)
-    -- self.opponentSprite = BattleSprite(self.opponent.party.pokemon[1].battleSpriteFront, 
-    --     VIRTUAL_WIDTH, 8)
+    self.turnOrder = {
+        [1] = {playerSide = true, index=1},
+        [2] = {playerSide = true, index=2},
+    }
+    for i, opp in pairs(self.opponentParty) do
+        self.turnOrder[i + #self.playerParty] = {playerSide = false, index = i}
+    end
+    self.turnToTake = 1 -- an index into self.turnOrder that indicates whose turn it is.
+    
 
-    -- -- health bars for pokemon
-    -- self.playerHealthBar = ProgressBar {
-    --     x = VIRTUAL_WIDTH - 160,
-    --     y = VIRTUAL_HEIGHT - 80,
-    --     width = 152,
-    --     height = 6,
-    --     color = {r = 189/255, g = 32/255, b = 32/255},
-    --     value = self.player.party.pokemon[1].currentHP,
-    --     max = self.player.party.pokemon[1].HP
-    -- }
+    -- -- status gui element
+    self.statusBoxes = {}
+    for i=1, #self.playerParty do
+        self.statusBoxes[i] = CombatStatus {
+            x = VIRTUAL_WIDTH - 80,
+            y = 5 + (i - 1) * 26,
+            -- should update CombatEntity to include the entity's name
+            entityName = i == 1 and 'Player' or 'Samurai',
+            HP = self.playerParty[i].HP,
+            currentHP = self.playerParty[i].currentHP
+        }
+    end
 
-    -- self.opponentHealthBar = ProgressBar {
-    --     x = 8,
-    --     y = 8,
-    --     width = 152,
-    --     height = 6,
-    --     color = {r = 189/255, g = 32/255, b = 32/255},
-    --     value = self.opponent.party.pokemon[1].currentHP,
-    --     max = self.opponent.party.pokemon[1].HP
-    -- }
-
-    -- -- exp bar for player
-    -- self.playerExpBar = ProgressBar {
-    --     x = VIRTUAL_WIDTH - 160,
-    --     y = VIRTUAL_HEIGHT - 73,
-    --     width = 152,
-    --     height = 6,
-    --     color = {r = 32/255, g = 32/255, b = 189/255},
-    --     value = self.player.party.pokemon[1].currentExp,
-    --     max = self.player.party.pokemon[1].expToLevel
-    -- }
-
-    -- -- flag for rendering health (and exp) bars, shown after pokemon slide in
-    -- self.renderHealthBars = false
-
-    -- -- circles underneath pokemon that will slide from sides at start
-    -- self.playerCircleX = -68
-    -- self.opponentCircleX = VIRTUAL_WIDTH + 32
-
-    -- -- references to active pokemon
-    -- self.playerPokemon = self.player.party.pokemon[1]
-    -- self.opponentPokemon = self.opponent.party.pokemon[1]
+    -- flag for rendering health (and exp) bars, shown after the entities run in
+    self.renderHUD = false
+    self.takingTurns = false
 end
 
 function BattleState:enter(params)
@@ -112,54 +89,51 @@ function BattleState:update(dt)
         gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
         function()
             gStateStack:pop()
+            --
+            -- TESTING
+            
+            gStateStack:push(BattleState())
+       
+            -- TESTING
+            --
             gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
         end
     ))
     end
+
+    if self.takingTurns == false then
+        self.takingTurns = true
+        gStateStack:push(TakeTurnState(self))
+    end
+
 end
 
 function BattleState:render()
-    -- love.graphics.clear(214/255, 214/255, 214/255, 1)
-
-    -- love.graphics.setColor(45/255, 184/255, 45/255, 124/255)
-    -- love.graphics.ellipse('fill', self.opponentCircleX, 60, 72, 24)
-    -- love.graphics.ellipse('fill', self.playerCircleX, VIRTUAL_HEIGHT - 64, 72, 24)
-
-    -- love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(gTextures['combat-forest'],0,0, 0, 0.35,0.35)
 
     for _, entity in ipairs(self.playerParty) do
-        -- add the shadows to the combat entity class instead of coding the shadows here.
-        love.graphics.setColor(20/255, 20/255, 80/255, 180/255)
-        love.graphics.ellipse('fill', entity.x, entity.y + 18, 12, 6)
-         love.graphics.setColor(1, 1, 1, 1)
         entity:render()
     end
     for _, entity in ipairs(self.opponentParty) do
-        love.graphics.setColor(20/255, 20/255, 80/255, 180/255)
-        love.graphics.ellipse('fill', entity.x, entity.y + 25, 12, 8)
-        love.graphics.setColor(1, 1, 1, 1)
         entity:render()
     end
 
-    -- if self.renderHealthBars then
-    --     self.playerHealthBar:render()
-    --     self.opponentHealthBar:render()
-    --     self.playerExpBar:render()
-
-    --     -- render level text
-    --     love.graphics.setColor(0, 0, 0, 1)
-    --     love.graphics.setFont(gFonts['small'])
-    --     love.graphics.print('LV ' .. tostring(self.playerPokemon.level),
-    --         self.playerHealthBar.x, self.playerHealthBar.y - 10)
-    --     love.graphics.print('LV ' .. tostring(self.opponentPokemon.level),
-    --         self.opponentHealthBar.x, self.opponentHealthBar.y + 8)
-    --     love.graphics.setFont(gFonts['medium'])
-    --     love.graphics.setColor(1, 1, 1, 1)
-    -- end
-
-    -- self.bottomPanel:render()
+    if self.renderHUD then
+        for _, status in pairs(self.statusBoxes) do
+            status:render()
+        end
+        for _, enemy in pairs(self.opponentParty) do
+            if enemy.showHP then
+                love.graphics.setFont(gFonts['small'])
+                love.graphics.print('HP: ' .. tostring(enemy.currentHP) .. '/' .. tostring(enemy.HP),
+                    math.floor(enemy.x + 5), math.floor(enemy.y + 25))
+            end
+        end
+    end
 end
+
+
+
 
 
 function BattleState:calcEntityPositions(vertSpacing, horizSpacing, middleX, middleY, party)
@@ -206,6 +180,7 @@ function BattleState:triggerSlideIn()
             [entity] = {x = entity.standingX}
         })
         :finish(function()
+            entity:changeAnimation('idle')
         end)
     end
     for _, entity in pairs(self.playerParty) do 
@@ -213,10 +188,15 @@ function BattleState:triggerSlideIn()
             [entity] = {x = entity.standingX}
         })
         :finish(function()
-            -- self:triggerStartingDialogue()
-            -- self.renderHealthBars = true
+            entity:changeAnimation('idle')
         end)
     end
+
+    Timer.after(1, function()
+        -- After 1 second has passed:
+        --self:triggerStartingDialogue()
+        self.renderHUD = true
+    end)
 end
 
 function BattleState:triggerStartingDialogue()
