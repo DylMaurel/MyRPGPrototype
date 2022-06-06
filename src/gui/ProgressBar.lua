@@ -41,11 +41,11 @@ function ProgressBar:render()
     love.graphics.setColor(self.color.r, self.color.g, self.color.b, 1)
     
     if self.value > 0 then
-        love.graphics.rectangle('fill', self.x, self.y, renderWidth, self.height, 3)
+        love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y), renderWidth, self.height, 3)
     end
 
     -- draw outline around actual bar
     love.graphics.setColor(0, 0, 0, 1)
-    love.graphics.rectangle('line', self.x, self.y, self.width, self.height, 3)
+    love.graphics.rectangle('line', math.floor(self.x), math.floor(self.y), self.width, self.height, 3)
     love.graphics.setColor(1, 1, 1, 1)
 end

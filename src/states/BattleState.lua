@@ -84,6 +84,9 @@ function BattleState:update(dt)
     for _, entity in pairs(self.opponentParty) do
         entity:update(dt)
     end
+    for _, statusBox in pairs(self.statusBoxes) do
+        statusBox:update(dt)
+    end
 
     if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') then
         gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
@@ -101,7 +104,7 @@ function BattleState:update(dt)
     ))
     end
 
-    if self.takingTurns == false then
+    if self.takingTurns == false and self.renderHUD == true then
         self.takingTurns = true
         gStateStack:push(TakeTurnState(self))
     end

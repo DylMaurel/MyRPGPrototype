@@ -7,6 +7,8 @@ CombatStatus = Class{}
 function CombatStatus:init(def)
     self.x = def.x
     self.y = def.y
+    self.initialX = self.x
+    self.initialY = self.y
     self.width = 75
     self.height = 24
     self.entityName = def.entityName
@@ -25,20 +27,21 @@ function CombatStatus:init(def)
 end
 
 function CombatStatus:update(dt)
-
+    self.healthBar.x = self.x + 8
+    self.healthBar.y = self.y + 17
 end
 
 function CombatStatus:render()
     if self.visible then
         love.graphics.setFont(gFonts['small'])
         love.graphics.setColor(0, 0, 0, 0.5)
-        love.graphics.rectangle('fill', self.x, self.y,
+        love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y),
             self.width, self.height, 3)
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.print(self.entityName, self.x + 2, self.y + 1)
-        love.graphics.print('HP', self.healthBar.x, self.healthBar.y - 7)
+        love.graphics.print(self.entityName, math.floor(self.x + 2), math.floor(self.y + 1))
+        love.graphics.print('HP', math.floor(self.healthBar.x), math.floor(self.healthBar.y - 7))
         love.graphics.print(tostring(self.healthBar.value) .. '/' .. 
-            tostring(self.healthBar.max), self.healthBar.x + 14, self.healthBar.y - 7)
+            tostring(self.healthBar.max), math.floor(self.healthBar.x + 14), math.floor(self.healthBar.y - 7))
         self.healthBar:render()
     end
 end

@@ -62,10 +62,11 @@ function Selection:render()
 
         -- draw selection marker if we're at the right index
         if i == self.currentSelection then
-            love.graphics.draw(gTextures['cursor'], self.x - 8, paddedY)
+            love.graphics.draw(gTextures['cursor'], math.floor(self.x - 8), math.floor(paddedY))
         end
 
-        love.graphics.printf(self.items[i].text, self.x, paddedY, self.width, 'center')
+        love.graphics.printf(self.items[i].text, math.floor(self.x),
+             math.floor(paddedY), self.width, 'center')
 
         currentY = currentY + self.gapHeight
     end

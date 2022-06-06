@@ -8,11 +8,14 @@
 
 Panel = Class{}
 
-function Panel:init(x, y, width, height)
+function Panel:init(x, y, width, height, frontColor, backColor)
     self.x = x
     self.y = y
     self.width = width
     self.height = height
+
+    self.backColor = backColor or {r=1,g=1,b=1,a=1}
+    self.frontColor = frontColor or {r=56/255, g=56/255, b=80/255, a=1}
 
     self.visible = true
 end
@@ -23,10 +26,14 @@ end
 
 function Panel:render()
     if self.visible then
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.rectangle('fill', self.x, self.y, self.width, self.height, 3)
-        love.graphics.setColor(56/255, 56/255, 80/255, 1)
-        love.graphics.rectangle('fill', self.x + 2, self.y + 2, self.width - 4, self.height - 4, 3)
+        love.graphics.setColor(
+            self.backColor.r, self.backColor.g, self.backColor.b, self.backColor.a)
+        love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y),
+            self.width, self.height, 3)
+        love.graphics.setColor(
+            self.frontColor.r, self.frontColor.g, self.frontColor.b, self.frontColor.a)
+        love.graphics.rectangle('fill', math.floor(self.x + 2), math.floor(self.y + 2),
+             self.width - 4, self.height - 4, 3)
         love.graphics.setColor(1, 1, 1, 1)
     end
 end
