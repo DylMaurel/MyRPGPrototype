@@ -75,6 +75,7 @@ function TakeTurnState:render()
         love.graphics.rectangle('fill', statusBox.x, statusBox.y - 1, statusBox.width, 1)
         love.graphics.rectangle('fill', statusBox.x, statusBox.y + statusBox.height, statusBox.width, 1)
     end
+
 end
 
 --
@@ -158,18 +159,22 @@ function TakeTurnState:attack()
         [self.attackEntity] = {x = attackPos.x,
                              y = attackPos.y}
     })
-    -- The following callback is called once the entity reaches the center of the screen
-    :finish(function()
+    :finish(function() self.attackEntity:changeAnimation('idle') end)
+    -- 0.75 - 0.5 = 0.25, which is the amount of time the entity stands idle in the 
+    -- attack position, before they start their attack animation.
+    Timer.after(0.75, function() 
         -- Here is where you would change to the animation for the selected move
         if self.isPlayerSide == true then self.attackEntity:changeAnimation('attack1') else
         self.attackEntity:changeAnimation('attack')
         end
-        -- The timer should wait for the move's duration, but moves aren't implemented yet.
-        Timer.after(1, function()
+        local moveDuration = self.attackEntity:animationPlayTime()
+        Timer.after(moveDuration, function()
+            
+
             -- Tween the attacking entity back to it's standing position
             Timer.tween(0.3, {
                 [self.attackEntity] = {x = self.attackEntity.standingX,
-                                     y = self.attackEntity.standingY}
+                                       y = self.attackEntity.standingY}
             })
             :finish(function() -- Is called after the entity returns to its original position
                 if self.isPlayerSide == false then self.attackEntity.showHP = true
@@ -182,6 +187,7 @@ function TakeTurnState:attack()
                     })
                 end    
                 self.attackEntity:changeAnimation('idle')
+                -- Signal that the current turn is complete
                 self.turnFinished = true
                 -- update the turnToTake variable so that we can go to the next turn.
                 self.battleState.turnToTake = self.battleState.turnToTake + 1
