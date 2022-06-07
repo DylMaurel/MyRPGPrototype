@@ -30,6 +30,7 @@ require 'src/gui/ProgressBar'
 require 'src/gui/Selection'
 require 'src/gui/Textbox'
 require 'src/gui/CombatStatus'
+require 'src/gui/CombatSelection'
 -- Game States
 require 'src/states/BaseState'
 require 'src/states/TakeTurnState'

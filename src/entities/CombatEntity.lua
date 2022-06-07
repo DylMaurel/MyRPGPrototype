@@ -12,6 +12,7 @@ function CombatEntity:init(def)
     self.shadow = def.shadow
     self.HP = def.HP or 100
     self.currentHP = self.HP
+    self.isEnemy = def.isEnemy or (not def.flipped)
 
     
     -- self.width = def.width

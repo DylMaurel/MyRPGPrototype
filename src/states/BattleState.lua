@@ -58,6 +58,7 @@ function BattleState:init(player)
         }
     end
 
+    self.highlightShader = self:createShader()
     -- flag for rendering health (and exp) bars, shown after the entities run in
     self.renderHUD = false
     self.takingTurns = false
@@ -88,21 +89,21 @@ function BattleState:update(dt)
         statusBox:update(dt)
     end
 
-    if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') then
-        gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
-        function()
-            gStateStack:pop()
-            --
-            -- TESTING
+    -- if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') then
+    --     gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+    --     function()
+    --         gStateStack:pop()
+    --         --
+    --         -- TESTING
             
-            gStateStack:push(BattleState())
+    --         gStateStack:push(BattleState())
        
-            -- TESTING
-            --
-            gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
-        end
-    ))
-    end
+    --         -- TESTING
+    --         --
+    --         gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+    --     end
+    -- ))
+    -- end
 
     if self.takingTurns == false and self.renderHUD == true then
         self.takingTurns = true
@@ -115,10 +116,22 @@ function BattleState:render()
     love.graphics.draw(gTextures['combat-forest'],0,0, 0, 0.35,0.35)
 
     for _, entity in ipairs(self.playerParty) do
+        if entity.isSelected == true then
+            love.graphics.setShader(self.highlightShader)
+            entity:render()
+            love.graphics.setShader()
+        else
         entity:render()
+        end
     end
     for _, entity in ipairs(self.opponentParty) do
+        if entity.isSelected == true then
+            love.graphics.setShader(self.highlightShader)
+            entity:render()
+            love.graphics.setShader()
+        else
         entity:render()
+        end
     end
 
     if self.renderHUD then
@@ -135,10 +148,16 @@ function BattleState:render()
     end
 end
 
+--
+--
+-- Helper Functions
+--
+--
 
-
-
-
+-- 
+-- Determines what the x and y of each entity should be. Just specify how much space
+-- should be between each entity, and specify where the center of the entity line should be.
+--
 function BattleState:calcEntityPositions(vertSpacing, horizSpacing, middleX, middleY, party)
     
     local numPlayerParty = #party
@@ -217,4 +236,22 @@ function BattleState:triggerStartingDialogue()
             gStateStack:push(BattleMenuState(self))
         end))
     end))
+end
+
+--
+-- Defines the shader that is used to highlight a selected sprite. The shader will
+-- be applied whenever a sprite is being selected by a CombatSelection object.
+--
+function BattleState:createShader()
+    local shaderCode = [[
+        vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords) {
+            vec4 pixel = Texel(tex, texture_coords);
+            vec4 brightnessScale = vec4(1.3, 1.3, 1.3, 1);
+            pixel = pixel * brightnessScale;
+            clamp(pixel, 0.0, 1.0);
+            return pixel * color;
+        }
+    ]]
+    
+    return love.graphics.newShader(shaderCode)
 end

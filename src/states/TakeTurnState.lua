@@ -38,7 +38,9 @@ function TakeTurnState:update(dt)
         gStateStack:pop()
     end
 
-    if self.menu ~= nil then self.menu:update() end
+    if self.combatSelection ~= nil then self.combatSelection:update(dt) end
+    if self.menu ~= nil then self.menu:update(dt) end
+    --if self.combatSelection ~= nil then self.combatSelection:update() end
 
     -- Check if the current turn is over for an entity.
     -- If so, determine the info for the next turn by calling :findTurn()
@@ -66,6 +68,7 @@ function TakeTurnState:render()
         love.graphics.rectangle('line', math.floor(panel.x - 1), math.floor(panel.y - 1),
             panel.width + 2, panel.height + 2)
     end
+    if self.combatSelection ~= nil then self.combatSelection:render() end
     if self.showStatusLines == true then
         local statusBox = self.battleState.statusBoxes[self.attackEntityIndex]
         love.graphics.setColor(1, 1, 1, 0.5)
@@ -80,20 +83,35 @@ end
 --
 --
 
---
 -- The menu will appear and disappear throughout the round, depending on
 -- whose turn it is. So we have a function that will make create a menu
--- in front of the entity for the player's current turn.
---
+-- in front of the entity whose turn it is.
 function TakeTurnState:createMenu()
+    local itemsForFightSelection = {}
+    for i, enemy in ipairs(self.battleState.opponentParty) do
+        itemsForFightSelection[i] = {entity = enemy, onSelect = function()
+             self:attack()
+             self.combatSelection = nil
+             end}
+    end
+
     self.menu = Menu({x=self.attackEntity.x - 52, y=self.attackEntity.y - 19,
     width=36, height=36, items = {
         [1] = {text = 'Fight', onSelect = function()
-             self:attack()
+             --self:attack()
+             self.combatSelection = CombatSelection(itemsForFightSelection)
              self.menu = nil
              end},
         [2] = {text = 'Item', onSelect = function() end},
-        [3] = {text = 'Flee', onSelect = function() end}
+        [3] = {text = 'Flee', onSelect = function()
+            gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+            function()
+                gStateStack:pop() -- pop this TakeTurnState
+                gStateStack:pop() --  pop the underlying BattleState
+                gStateStack:push(BattleState()) -- For testing, pop a new battleState
+                gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+            end))
+            end}
     },
     frontColor = {r=0, g=0, b=0, a=0.5}, backColor = {r=0, g=0, b=0, a=0}
 })
@@ -135,7 +153,7 @@ function TakeTurnState:attack()
     self.attackEntity:changeAnimation('run')
 
 
-    --Move the entity to the middle of the screen, and perform the attack animation.
+    --Move the entity to the middle of the screen
     Timer.tween(0.5, {
         [self.attackEntity] = {x = attackPos.x,
                              y = attackPos.y}
@@ -146,8 +164,9 @@ function TakeTurnState:attack()
         if self.isPlayerSide == true then self.attackEntity:changeAnimation('attack1') else
         self.attackEntity:changeAnimation('attack')
         end
-        -- You should tween for the move's duration, but moves aren't implemented yet.
+        -- The timer should wait for the move's duration, but moves aren't implemented yet.
         Timer.after(1, function()
+            -- Tween the attacking entity back to it's standing position
             Timer.tween(0.3, {
                 [self.attackEntity] = {x = self.attackEntity.standingX,
                                      y = self.attackEntity.standingY}
@@ -155,7 +174,6 @@ function TakeTurnState:attack()
             :finish(function() -- Is called after the entity returns to its original position
                 if self.isPlayerSide == false then self.attackEntity.showHP = true
                 else
-                    Timer.tween(0.3, {[self.attackEntity] = {x = self.attackEntity.standingX}})
                     -- if the turn belonged to the player's side then we must return the
                     -- status box to it's original position
                     local statusBox = self.battleState.statusBoxes[self.attackEntityIndex]
@@ -163,7 +181,6 @@ function TakeTurnState:attack()
                         [statusBox] =  {x = statusBox.initialX}
                     })
                 end    
-                
                 self.attackEntity:changeAnimation('idle')
                 self.turnFinished = true
                 -- update the turnToTake variable so that we can go to the next turn.
@@ -183,9 +200,7 @@ function TakeTurnState:shiftEntityForTurn()
     self.showStatusLines = true
     local statusBox = self.battleState.statusBoxes[self.attackEntityIndex]
     Timer.tween(0.3, {[self.attackEntity] = {x = self.attackEntity.x - 32}})
-    Timer.tween(0.3, {
-        [statusBox] =  {x = statusBox.x - 24}
-    })
+    Timer.tween(0.3, { [statusBox] =  {x = statusBox.x - 24} })
     :finish(function() self:createMenu() end)
 end
 

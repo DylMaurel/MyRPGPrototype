@@ -1,13 +1,9 @@
 --[[
-    GD50
-    Super Mario Bros. Remake
-
-    -- StartState Class --
+   
 
     Author: Colton Ogden
     cogden@cs50.harvard.edu
 
-    Helper functions for writing Match-3.
 ]]
 
 --[[
@@ -70,4 +66,16 @@ function print_r ( t )
         sub_print_r(t,"  ")
     end
     print()
+end
+
+--[[
+    In-out quadratic easing function
+]]
+function inOutEase(time, beginValue, changeAmount, duration)
+    time = time / duration * 2
+    if time < 1 then
+      return changeAmount / 2 * math.pow(time, 2) + beginValue
+    else
+      return -changeAmount / 2 * ((time - 1) * (time - 3) - 1) + beginValue
+    end
 end
