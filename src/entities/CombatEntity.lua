@@ -10,13 +10,35 @@ function CombatEntity:init(def)
     self.animations = self:createAnimations(def.animations)
     self.drawOffset = def.drawOffset
     self.shadow = def.shadow
-    self.HP = def.HP or 100
+    --self.HP = def.HP or 100
     self.currentHP = self.HP
     self.isEnemy = def.isEnemy or (not def.flipped)
+    self.isDead = false
+
+    -- STATS Specific to the kind of entity
+    self.baseHP = def.baseHP
+    self.baseAttack = def.baseAttack
+    self.baseDefense = def.baseDefense
+    self.baseSpeed = def.baseSpeed
+
+    self.HPIV = def.HPIV
+    self.attackIV = def.attackIV
+    self.defenseIV = def.defenseIV
+    self.speedIV = def.speedIV
+
+    -- STATS specific to the entity's current level
+    self.HP = self.baseHP
+    self.attack = self.baseAttack
+    self.defense = self.baseDefense
+    self.speed = self.baseSpeed
+
+    -- Stats specific to the current battle
+    self.currentHP = self.baseHP
+    self.currentAttack = self.baseAttack 
+    self.currentDefense = self.baseDefense
+    self.currentSpeed = self.baseSpeed
 
     
-    -- self.width = def.width
-    -- self.height = def.height
     self.x = def.x or 0
     self.y = def.y or 0
 

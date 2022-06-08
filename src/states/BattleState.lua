@@ -141,7 +141,7 @@ function BattleState:render()
         for _, enemy in pairs(self.opponentParty) do
             if enemy.showHP then
                 love.graphics.setFont(gFonts['small'])
-                love.graphics.print('HP: ' .. tostring(enemy.currentHP) .. '/' .. tostring(enemy.HP),
+                love.graphics.print('HP: ' .. tostring(math.floor(enemy.currentHP)) .. '/' .. tostring(enemy.HP),
                     math.floor(enemy.x + 5), math.floor(enemy.y + 25))
             end
         end

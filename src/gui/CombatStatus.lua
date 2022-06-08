@@ -40,7 +40,7 @@ function CombatStatus:render()
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.print(self.entityName, math.floor(self.x + 2), math.floor(self.y + 1))
         love.graphics.print('HP', math.floor(self.healthBar.x), math.floor(self.healthBar.y - 7))
-        love.graphics.print(tostring(self.healthBar.value) .. '/' .. 
+        love.graphics.print(tostring(math.floor(self.healthBar.value)) .. '/' .. 
             tostring(self.healthBar.max), math.floor(self.healthBar.x + 14), math.floor(self.healthBar.y - 7))
         self.healthBar:render()
     end
