@@ -80,7 +80,6 @@ function TakeTurnState:update(dt)
             -- Make the enemy attack, but after waiting for a little bit.
             Timer.after(1, function() 
                 local playerParty = self.battleState.playerParty
-                --local opponentIndex = math.random(#playerParty)
                 local aliveEntityIndices = {}
                 for i, entity in ipairs(playerParty) do
                     if entity.isDead == false then
