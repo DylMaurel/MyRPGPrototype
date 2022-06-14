@@ -25,6 +25,14 @@ function TakeTurnState:init(battleState)
         self:shiftEntityForTurn()
     end
 
+    if self:checkVictory() then
+        gSounds['door']:play()
+        TakeTurnState:newBattle()
+    end
+    if self:checkDefeat() then
+        gSounds['sword']:play()
+        TakeTurnState:newBattle()
+    end
 end
 
 function TakeTurnState:update(dt)
@@ -36,15 +44,27 @@ function TakeTurnState:update(dt)
         self.battleState.turnToTake = 1
         self.battleState.takingTurns = false
         gStateStack:pop()
+        return
     end
 
     if self.combatSelection ~= nil then self.combatSelection:update(dt) end
     if self.menu ~= nil then self.menu:update(dt) end
-    --if self.combatSelection ~= nil then self.combatSelection:update() end
 
     -- Check if the current turn is over for an entity.
     -- If so, determine the info for the next turn by calling :findTurn()
     if self.turnFinished == true then
+        -- check victory
+        if self:checkVictory() then
+            gSounds['door']:play()
+            TakeTurnState:newBattle()
+        end
+        if self:checkDefeat() then
+            gSounds['sword']:play()
+            TakeTurnState:newBattle()
+        end
+        -- check defeat
+
+
         -- If there is a turn remaining in the round, then :findTurn() updates the turn info
         -- and has returns true. If a turn doesn't exist (because of dead entities), then
         -- calling :findTurn would return false.
@@ -60,12 +80,20 @@ function TakeTurnState:update(dt)
             -- Make the enemy attack, but after waiting for a little bit.
             Timer.after(1, function() 
                 local playerParty = self.battleState.playerParty
-                local opponentIndex = math.random(#playerParty)
+                --local opponentIndex = math.random(#playerParty)
+                local aliveEntityIndices = {}
+                for i, entity in ipairs(playerParty) do
+                    if entity.isDead == false then
+                        table.insert(aliveEntityIndices, i)
+                    end
+                end
+                local opponentIndex = aliveEntityIndices[math.random(#aliveEntityIndices)]
                 self:attack(playerParty[opponentIndex], opponentIndex) 
             end)
         end
         self.turnFinished = false
     end
+
 end
 
 function TakeTurnState:render()
@@ -91,6 +119,35 @@ end
 --
 --
 
+function TakeTurnState:newBattle()
+    gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
+            function()
+                gStateStack:pop() -- pop this TakeTurnState
+                gStateStack:pop() --  pop the underlying BattleState
+                gStateStack:push(BattleState()) -- For testing, push a new battleState
+                gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
+            end))
+
+end
+function TakeTurnState:checkVictory()
+    for i, entity in pairs(self.battleState.opponentParty) do
+        if entity.currentHP ~= 0 then
+            return false
+        end
+    end
+    return true
+end
+function TakeTurnState:checkDefeat()
+    for i, entity in pairs(self.battleState.playerParty) do
+        if entity.currentHP ~= 0 then
+            return false
+        end
+    end
+    return true
+end
+
+
+
 -- The menu will appear and disappear throughout the round, depending on
 -- whose turn it is. So we have a function that will make create a menu
 -- in front of the entity whose turn it is.
@@ -112,20 +169,11 @@ function TakeTurnState:createMenu()
     self.menu = Menu({x=self.attackEntity.x - 52, y=self.attackEntity.y - 19,
     width=36, height=36, items = {
         [1] = {text = 'Fight', onSelect = function()
-             --self:attack()
              self.combatSelection = CombatSelection(itemsForFightSelection)
              self.menu = nil
              end},
         [2] = {text = 'Item', onSelect = function() end},
-        [3] = {text = 'Flee', onSelect = function()
-            gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
-            function()
-                gStateStack:pop() -- pop this TakeTurnState
-                gStateStack:pop() --  pop the underlying BattleState
-                gStateStack:push(BattleState()) -- For testing, pop a new battleState
-                gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
-            end))
-            end}
+        [3] = {text = 'Flee', onSelect = function() TakeTurnState:newBattle() end}
     },
     frontColor = {r=0, g=0, b=0, a=0.5}, backColor = {r=0, g=0, b=0, a=0}
 })
@@ -141,7 +189,6 @@ function TakeTurnState:findTurn()
     local battState = self.battleState
     if battState.turnToTake > #battState.turnOrder then return false end
 
-
     -- Find out who is attacking on this turn within the current round.
     local attackEntityIndex = battState.turnOrder[battState.turnToTake].index
     if battState.turnOrder[battState.turnToTake].playerSide == true then
@@ -153,8 +200,6 @@ function TakeTurnState:findTurn()
             battState.turnToTake = battState.turnToTake + 1
             return self:findTurn()
         end
-        --self.attackEntity = battState.playerParty[attackEntityIndex]
-        --self.isPlayerSide = true
     else
         local entity = battState.opponentParty[attackEntityIndex]
         if entity.isDead == false then
@@ -165,13 +210,9 @@ function TakeTurnState:findTurn()
             battState.turnToTake = battState.turnToTake + 1
             return self:findTurn()
         end
-        -- self.attackEntity = battState.opponentParty[attackEntityIndex]
-        -- self.isPlayerSide = false
     end
-    --
     self.attackEntityIndex = attackEntityIndex
     return true
-    --
 end
 
 --
@@ -197,6 +238,8 @@ function TakeTurnState:attack(targetEntity, targetEntityIndex)
                              y = attackPos.y}
     })
     :finish(function() self.attackEntity:changeAnimation('idle') end)
+
+
     -- 0.75 - 0.5 = 0.25, which is the amount of time the entity stands idle in the 
     -- attack position, before they start their attack animation.
     Timer.after(0.75, function() 
@@ -215,39 +258,25 @@ function TakeTurnState:attack(targetEntity, targetEntityIndex)
             -- Damage the target entity
             local dmg = math.floor(math.max(1, (self.attackEntity.currentAttack * 1.5) -  targetEntity.currentDefense))
             local computedHP = targetEntity.currentHP - dmg
-            -- Check if the target entity has died. It is important to check this now because an enemy's
-            -- currentHP will only become the computedHP until a full second has passed. And if
-            -- we waited 1 second to check for deaths, then it is possible for :findTurn() to be called
-            -- before a targetEntity is actually deemed dead.
-            if computedHP <= 0 then
-                targetEntity.isDead = true
-                Timer.after(1, function() self:faint(targetEntity) end)
+
+            local checkDeath = function()
+                if targetEntity.currentHP == 0 then
+                    self:faint(targetEntity)
+                end
             end
             if targetEntity.isEnemy == true then
                 Timer.tween(1, {[targetEntity] = {currentHP = math.max(0, computedHP)}})
+                :finish(checkDeath)
             else
                 targetEntity.currentHP = math.max(0, computedHP)
                 local targetHealthBar = self.battleState.statusBoxes[targetEntityIndex].healthBar
                 Timer.tween(1, {[targetHealthBar] = {value = targetEntity.currentHP}})
+                :finish(checkDeath)
             end
-            -- Check if the target entity has died. We check this after the health has dropped.
-                -- Timer.after(1.1, function()
-                --     if targetEntity.currentHP == 0 then
-                --         self:faint(targetEntity)
-                --     end
-                -- end)
         end)
 
-        -- Wait for the move animation to complete, and wait 0.5 sec for the health display to be tweened.
-        -- Timer.after(moveDuration, function()
-        --     self.attackEntity:changeAnimation('idle')
-        -- end)
-            -- -- Tween the attacking entity back to it's standing position
-            -- Timer.tween(0.3, {
-            --     [self.attackEntity] = {x = self.attackEntity.standingX,
-            --                            y = self.attackEntity.standingY}
-            -- })
-        -- Wait for the move animation to complete, and wait 0.5 sec for the health display to be tweened.
+        -- Wait for the move animation to complete, then begin tween to original position, and change
+        -- the entity'es animation to 'run'
         Timer.after(moveDuration, function()
             Timer.tween(0.3, {
                 [self.attackEntity] = {x = self.attackEntity.standingX,
@@ -264,19 +293,16 @@ function TakeTurnState:attack(targetEntity, targetEntityIndex)
                     })
                 end    
                 self.attackEntity:changeAnimation('idle')
-                -- Signal that the current turn is complete
-                self.turnFinished = true
-                -- update the turnToTake variable so that we can go to the next turn.
-                self.battleState.turnToTake = self.battleState.turnToTake + 1
             end) 
             self.attackEntity:changeAnimation('run')
         end)
-        -- Timer.after((moveDuration * 0.75) + 1, function()
-        --      -- Signal that the current turn is complete
-        --      self.turnFinished = true
-        --      -- update the turnToTake variable so that we can go to the next turn.
-        --      self.battleState.turnToTake = self.battleState.turnToTake + 1
-        -- end)
+        -- Wait until all events for the round should be complete, then...
+        Timer.after((moveDuration) + 1, function()
+             -- Signal that the current turn is complete
+             self.turnFinished = true
+             -- update the turnToTake variable so that we can go to the next turn.
+             self.battleState.turnToTake = self.battleState.turnToTake + 1
+        end)
     end)
 
 end

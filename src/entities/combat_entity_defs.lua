@@ -5,7 +5,7 @@
 
 COMBAT_ENTITY_DEFS = {
     ['player'] = {
-        baseHP = 100,
+        baseHP = 10,
         baseAttack = 30,
         baseDefense = 25,
         baseSpeed = 30,
@@ -51,7 +51,7 @@ COMBAT_ENTITY_DEFS = {
         }
     },
     ['samurai'] = {
-        baseHP = 100,
+        baseHP = 10,
         baseAttack = 35,
         baseDefense = 20,
         baseSpeed = 35,
