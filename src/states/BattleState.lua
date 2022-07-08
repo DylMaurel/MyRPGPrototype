@@ -62,6 +62,7 @@ function BattleState:init(player)
     -- flag for rendering health (and exp) bars, shown after the entities run in
     self.renderHUD = false
     self.takingTurns = false
+    self.battleMessageActive = false
 end
 
 function BattleState:enter(params)
@@ -78,6 +79,7 @@ function BattleState:update(dt)
     if not self.battleStarted then
         self:triggerSlideIn()
     end
+    
 
     for _, entity in pairs(self.playerParty) do
         entity:update(dt)
@@ -104,6 +106,7 @@ function BattleState:update(dt)
     --     end
     -- ))
     -- end
+    if self.battleMessageActive == true then return end
 
     if self.takingTurns == false and self.renderHUD == true then
         self.takingTurns = true
@@ -217,26 +220,28 @@ function BattleState:triggerSlideIn()
     Timer.after(1, function()
         -- After 1 second has passed:
         --self:triggerStartingDialogue()
+        gStateStack:push(BattleMessageState(self, 'Wild enemies have appeared!', 1))
+        self.battleMessageActive = true
         self.renderHUD = true
     end)
 end
 
-function BattleState:triggerStartingDialogue()
+-- function BattleState:triggerStartingDialogue()
     
-    -- display a dialogue first for the pokemon that appeared, then the one being sent out
-    gStateStack:push(BattleMessageState('A wild ' .. tostring(self.opponent.party.pokemon[1].name ..
-        ' appeared!'),
+--     -- display a dialogue first for the pokemon that appeared, then the one being sent out
+--     gStateStack:push(BattleMessageState('A wild ' .. tostring(self.opponent.party.pokemon[1].name ..
+--         ' appeared!'),
     
-    -- callback for when the battle message is closed
-    function()
-        gStateStack:push(BattleMessageState('Go, ' .. tostring(self.player.party.pokemon[1].name .. '!'),
+--     -- callback for when the battle message is closed
+--     function()
+--         gStateStack:push(BattleMessageState('Go, ' .. tostring(self.player.party.pokemon[1].name .. '!'),
     
-        -- push a battle menu onto the stack that has access to the battle state
-        function()
-            gStateStack:push(BattleMenuState(self))
-        end))
-    end))
-end
+--         -- push a battle menu onto the stack that has access to the battle state
+--         function()
+--             gStateStack:push(BattleMenuState(self))
+--         end))
+--     end))
+-- end
 
 --
 -- Defines the shader that is used to highlight a selected sprite. The shader will

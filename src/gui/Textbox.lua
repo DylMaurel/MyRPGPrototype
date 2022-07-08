@@ -4,6 +4,8 @@
 
     Author: Colton Ogden
     cogden@cs50.harvard.edu
+
+    Edited by: Dylan Maurel
 ]]
 
 Textbox = Class{}

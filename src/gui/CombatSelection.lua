@@ -20,7 +20,7 @@ function CombatSelection:init(def)
     else
         self.xOffset = -24
     end
-    self.tweenAmount = 5
+    self.tweenAmount = 4
     self.tweenComplete = true
 
     self.font = def.font or gFonts['small']
@@ -32,7 +32,7 @@ function CombatSelection:update(dt)
     -- Make the cursor continually move left and right
     if self.tweenComplete == true then
         self.tweenComplete = false
-        Timer.tween(0.4, {
+        Timer.tween(0.8, {
             [self] = {xOffset = self.xOffset + self.tweenAmount}
         })
         :group(self.timers)
