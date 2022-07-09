@@ -1,11 +1,5 @@
 --[[
-    GD50
-    Pokemon
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-
-    Edited by: Dylan Maurel
+    My RPG Prototype
 ]]
 
 -- To be used by BattleMessageState
@@ -21,6 +15,14 @@ function CombatTextbox:init(text)
     self.text = text
     self.font = gFonts['small']
     _, self.textChunks = self.font:getWrap(self.text, self.width - 19)
+    self.displayingChunks = {}
+    
+    -- This variable will be used to determine how many characters of the text
+    -- need to be displayed in a given frame. (e.g., if the textPosition == 5, then only
+    -- the first 5 characters of the string will be displayed.)
+    -- This value is less than or equal to the sum of the lengths of each string in displayingChunks. 
+    self.textPosition = 1
+    self.timers = {}
 
     self.chunkCounter = 1
     self.endOfText = false
@@ -59,14 +61,40 @@ function CombatTextbox:next()
         self.displayingChunks = {}
         self.closed = true
     else
+        self.textPosition = 1 -- reset the text position
         self.displayingChunks = self:nextChunks()
+
+        local numChars = 0
+        -- define the speed with which the text should appear in the textbox.
+        local charsPerSecond = 40
+        for _, chunk in pairs(self.displayingChunks) do
+            numChars = numChars + string.len(chunk)
+        end
+        -- Remember the lastCharPosition so that the user can end the tween and
+        -- display all the text immediately, if they want to.
+        self.lastCharPosition = numChars
+        -- this is a variation of the forumula: time = distance / rate
+        local tweenTime = numChars / charsPerSecond
+        Timer.tween(tweenTime, {
+            [self] = {textPosition = numChars}
+        })
+        :group(self.timers)
+        
     end
 end
 
 function CombatTextbox:update(dt)
     if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
-        self:next()
+        -- show the entire text if the user presses enter
+        if self.textPosition < self.lastCharPosition then
+            Timer.clear(self.timers)
+            self.textPosition = self.lastCharPosition
+        -- If the full text is showing and the textbox is triggerable, go to the next chunks of text
+        elseif self.triggerable then
+            self:next()
+        end
     end
+    Timer.update(dt, self.timers)
 end
 
 function CombatTextbox:isClosed()
@@ -74,8 +102,8 @@ function CombatTextbox:isClosed()
 end
 
 function CombatTextbox:render()
-    
     love.graphics.setFont(self.font)
+    -- print the transparent background for the text. Also print the line around the background.
     love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y),
         self.width, self.height, 3)
@@ -84,9 +112,23 @@ function CombatTextbox:render()
     self.width + 1, self.height + 1, 3)
     love.graphics.setColor(1, 1, 1, 1)
     
+    -- Loop through each line of text that must be displayed. Print the text
+    -- based on the current value of self.textPosition
+    local charCounter = 0
+    local lineStartPos = 0
+    local roundedTextPos = math.floor(self.textPosition + 0.5)
 
-    for i = 1, #self.displayingChunks do
-        love.graphics.print(self.displayingChunks[i], self.x + 3, self.y + 3 + (i - 1) * 11)
+    -- print the lines of text, gradually, according to the tweened text position.
+    for i, chunk in ipairs(self.displayingChunks) do
+        lineStartPos = charCounter -- start of the line
+        charCounter = charCounter + string.len(chunk) -- end of the line
+        if roundedTextPos < charCounter then
+            love.graphics.print(string.sub(self.displayingChunks[i], 1, roundedTextPos - lineStartPos),
+                self.x + 3, self.y + 3 + (i - 1) * 11)
+            break
+        else
+            love.graphics.print(self.displayingChunks[i], self.x + 3, self.y + 3 + (i - 1) * 11)
+        end
     end
 end
 

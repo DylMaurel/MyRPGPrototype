@@ -4,10 +4,10 @@
 
 BattleMessageState = Class{__includes = BaseState}
 
-function BattleMessageState:init(battleState, text, timeTillUpdateable, callback)
+function BattleMessageState:init(battleState, text, timeTillTrigger, callback)
     self.battleState = battleState
-    self.timeTillUpdateable = timeTillUpdateable
-    self.updateable = false
+    self.timeTillTrigger = timeTillTrigger or 0
+    self.triggerable = false
     self.elapsedTime = 0
     self.text = text
     self.combatTextbox = CombatTextbox(text)
@@ -25,18 +25,19 @@ end
 
 function BattleMessageState:update(dt)
     self.battleState:update(dt)
+    self.combatTextbox:update(dt)
     -- Exit this update method if not enough time has elapsed. Otherwise, continue execution.
-    if self.elapsedTime < self.timeTillUpdateable then
+    if self.elapsedTime < self.timeTillTrigger then
         self.elapsedTime = self.elapsedTime + dt
         return
     end
-    self.updateable = true
-    self.combatTextbox:update(dt)
+    self.triggerable = true
+    self.combatTextbox.triggerable = true
 
-      -- Continually tween the down arrow's position up and down
-      if self.tweenComplete == true then
+    -- Continually tween the down arrow's position up and down
+    if self.tweenComplete == true then
         self.tweenComplete = false
-        Timer.tween(1.5, {
+        Timer.tween(1.75, {
             [self] = {arrowYOffset = self.arrowYOffset + self.tweenAmount}
         })
         :group(self.timers)
@@ -47,7 +48,7 @@ function BattleMessageState:update(dt)
                 self.tweenAmount = -self.tweenAmount
         end)
     end
-    -- update the timer group for this state
+    -- update the timer group for this class
     Timer.update(dt, self.timers)
     
     if self.combatTextbox:isClosed() then
@@ -60,16 +61,9 @@ end
 
 function BattleMessageState:render()
     self.combatTextbox:render()
-    if self.updateable == true then
-    -- We floor the arrow's Yoffset on one end of the tween and ceil the Yoffset on
-    -- the other end of the tween because it looks smoother this way.
-        local yOffset = 0
-        if self.tweenAmount < 0 then 
-            yOffset = math.floor(self.arrowYOffset) 
-        else
-            yOffset = math.ceil(self.arrowYOffset)
-        end
-        self.combatTextbox:renderDownArrow(yOffset)
+    if self.triggerable == true and self.combatTextbox.textPosition == self.combatTextbox.lastCharPosition then
+        -- round the arrowYOffset to the nearest integer
+        self.combatTextbox:renderDownArrow(math.floor(self.arrowYOffset + 0.5))
     end
 end
 

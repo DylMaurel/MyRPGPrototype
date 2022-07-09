@@ -78,6 +78,12 @@ function BattleState:update(dt)
     -- this will trigger the first time this state is actively updating on the stack
     if not self.battleStarted then
         self:triggerSlideIn()
+        Timer.after(1, function()
+            -- After 1 second for the slideIn has passed:
+            gStateStack:push(BattleMessageState(self, 'Wild enemies have appeared!'))
+            self.battleMessageActive = true
+            self.renderHUD = true
+        end)
     end
     
 
@@ -91,21 +97,6 @@ function BattleState:update(dt)
         statusBox:update(dt)
     end
 
-    -- if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('enter') then
-    --     gStateStack:push(FadeInState({r=1, g=1, b=1}, 0.5,
-    --     function()
-    --         gStateStack:pop()
-    --         --
-    --         -- TESTING
-            
-    --         gStateStack:push(BattleState())
-       
-    --         -- TESTING
-    --         --
-    --         gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
-    --     end
-    -- ))
-    -- end
     if self.battleMessageActive == true then return end
 
     if self.takingTurns == false and self.renderHUD == true then
@@ -216,32 +207,7 @@ function BattleState:triggerSlideIn()
             entity:changeAnimation('idle')
         end)
     end
-
-    Timer.after(1, function()
-        -- After 1 second has passed:
-        --self:triggerStartingDialogue()
-        gStateStack:push(BattleMessageState(self, 'Wild enemies have appeared!', 1))
-        self.battleMessageActive = true
-        self.renderHUD = true
-    end)
 end
-
--- function BattleState:triggerStartingDialogue()
-    
---     -- display a dialogue first for the pokemon that appeared, then the one being sent out
---     gStateStack:push(BattleMessageState('A wild ' .. tostring(self.opponent.party.pokemon[1].name ..
---         ' appeared!'),
-    
---     -- callback for when the battle message is closed
---     function()
---         gStateStack:push(BattleMessageState('Go, ' .. tostring(self.player.party.pokemon[1].name .. '!'),
-    
---         -- push a battle menu onto the stack that has access to the battle state
---         function()
---             gStateStack:push(BattleMenuState(self))
---         end))
---     end))
--- end
 
 --
 -- Defines the shader that is used to highlight a selected sprite. The shader will
