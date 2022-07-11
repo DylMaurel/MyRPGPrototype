@@ -1,12 +1,14 @@
 --[[
     My RPG Prototype
+
+    Dylan Maurel
 ]]
 
 -- To be used by BattleMessageState
 CombatTextbox = Class{}
 
 function CombatTextbox:init(text)
-    self.width = math.floor(VIRTUAL_WIDTH / 2)
+    self.width = math.floor(VIRTUAL_WIDTH / 2) - 1
     --self.height = math.floor(VIRTUAL_HEIGHT / 7)
     self.height = 26
     self.x = math.floor((VIRTUAL_WIDTH / 2) - (self.width / 2))

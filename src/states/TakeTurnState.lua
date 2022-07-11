@@ -11,9 +11,9 @@ TakeTurnState = Class{__includes = BaseState}
 
 function TakeTurnState:init(battleState)
     self.battleState = battleState
-    -- :findTurn() has the side-effect of assigning values to self.isPlayerSide
+    -- :findNextTurn() has the side-effect of assigning values to self.isPlayerSide
     -- as well as self.attackEntity
-    self:findTurn()
+    self:findNextTurn()
     self.turnFinished = false
     -- These are the lines that highlight the status box for the current entity's
     -- turn, if that entity is on the player's side.
@@ -51,12 +51,12 @@ function TakeTurnState:update(dt)
     if self.menu ~= nil then self.menu:update(dt) end
 
     -- Check if the current turn is over for an entity.
-    -- If so, determine the info for the next turn by calling :findTurn()
+    -- If so, determine the info for the next turn by calling :findNextTurn()
     if self.turnFinished == true then
-        -- If there is a turn remaining in the round, then :findTurn() updates the turn info
+        -- If there is a turn remaining in the round, then :findNextTurn() updates the turn info
         -- and has returns true. If a turn doesn't exist (because of dead entities), then
-        -- calling :findTurn would return false.
-        if self:findTurn() == false then return end
+        -- calling :findNextTurn would return false.
+        if self:findNextTurn() == false then return end
         -- If the current turn belongs to the player's side, then we call
         -- shiftEntityForTurn() in order to move the entity and its status box forward.
         if self.isPlayerSide == true then
@@ -86,9 +86,6 @@ end
 function TakeTurnState:render()
     if self.menu ~= nil then
         self.menu:render()
-        local panel = self.menu.panel
-        love.graphics.rectangle('line', math.floor(panel.x - 1), math.floor(panel.y - 1),
-            panel.width + 2, panel.height + 2)
     end
     if self.combatSelection ~= nil then self.combatSelection:render() end
     if self.showStatusLines == true then
@@ -153,7 +150,7 @@ function TakeTurnState:createMenu()
         end
     end
 
-    self.menu = Menu({x=self.attackEntity.x - 52, y=self.attackEntity.y - 19,
+    self.menu = Menu({x=self.attackEntity.x - 53, y=self.attackEntity.y - 19,
     width=36, height=36, items = {
         [1] = {text = 'Fight', onSelect = function()
              self.combatSelection = CombatSelection(itemsForFightSelection)
@@ -162,8 +159,8 @@ function TakeTurnState:createMenu()
         [2] = {text = 'Item', onSelect = function() end},
         [3] = {text = 'Flee', onSelect = function() TakeTurnState:newBattle() end}
     },
-    frontColor = {r=0, g=0, b=0, a=0.5}, backColor = {r=0, g=0, b=0, a=0}
-})
+    frontColor = {r=0, g=0, b=0, a=0.5}, backColor = {r=1, g=1, b=1, a=0.9}
+    })
 end
 
 --    Determines who the attacker is for the current turn, and whether they are
@@ -172,7 +169,7 @@ end
 --    If there are entities in the battle that are dead, then we want to skip their turn.
 -- But also, there is a chance that no turns are remaining, because the last entities in 
 -- the turn order are dead. So, we return true if a turn exists, and false otherwise.
-function TakeTurnState:findTurn()
+function TakeTurnState:findNextTurn()
     local battState = self.battleState
     if battState.turnToTake > #battState.turnOrder then return false end
 
@@ -185,7 +182,7 @@ function TakeTurnState:findTurn()
             self.isPlayerSide = true
         else
             battState.turnToTake = battState.turnToTake + 1
-            return self:findTurn()
+            return self:findNextTurn()
         end
     else
         local entity = battState.opponentParty[attackEntityIndex]
@@ -193,9 +190,9 @@ function TakeTurnState:findTurn()
             self.attackEntity = battState.opponentParty[attackEntityIndex]
             self.isPlayerSide = false
         else
-            -- entity is dead. So call :findTurn() again for the next entity in the turn order
+            -- entity is dead. So call :findNextTurn() again for the next entity in the turn order
             battState.turnToTake = battState.turnToTake + 1
-            return self:findTurn()
+            return self:findNextTurn()
         end
     end
     self.attackEntityIndex = attackEntityIndex
@@ -284,12 +281,7 @@ function TakeTurnState:attack(targetEntity, targetEntityIndex)
                 self:faint(targetEntity, afterFaint)
             end
             
-            local battleMessageCallback = nil
-            if willFaint then battleMessageCallback = afterDamagedWithFaint
-            else
-                battleMessageCallback = afterDamagedNoFaint
-            end
-            --local battleMessageCallback = willFaint and afterDamagedWithFaint or afterDamagedNoFaint
+            local battleMessageCallback = willFaint and afterDamagedWithFaint or afterDamagedNoFaint
             
             -- push a BattleMessageState to tell how much damage was dealt. The third parameter to the new state ensures
             -- that the BattleMessageState cannot be exited until 1 second for the upcoming damage tween has passed.
@@ -355,7 +347,7 @@ function TakeTurnState:shiftEntityForTurn()
     self.showStatusLines = true
     local statusBox = self.battleState.statusBoxes[self.attackEntityIndex]
     Timer.tween(0.3, {[self.attackEntity] = {x = self.attackEntity.x - 32}})
-    Timer.tween(0.3, { [statusBox] =  {x = statusBox.x - 24} })
+    Timer.tween(0.3, { [statusBox] =  {x = statusBox.x - 14} })
     :finish(function() self:createMenu() end)
 end
 

@@ -1,14 +1,14 @@
 --[[
-    GD50
-    Pokemon
 
     Author: Colton Ogden
     cogden@cs50.harvard.edu
+
+    Edited by Dylan Maurel to include custom colors
 ]]
 
 Panel = Class{}
 
-function Panel:init(x, y, width, height, frontColor, backColor)
+function Panel:init(x, y, width, height, backColor, frontColor)
     self.x = x
     self.y = y
     self.width = width
@@ -26,14 +26,17 @@ end
 
 function Panel:render()
     if self.visible then
+        -- draw back of panel
         love.graphics.setColor(
             self.backColor.r, self.backColor.g, self.backColor.b, self.backColor.a)
-        love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y),
-            self.width, self.height, 3)
+        love.graphics.rectangle('line', math.floor(self.x - 1), math.floor(self.y - 1),
+        self.width + 2, self.height + 2, 3)
+        -- draw front of panel
         love.graphics.setColor(
             self.frontColor.r, self.frontColor.g, self.frontColor.b, self.frontColor.a)
-        love.graphics.rectangle('fill', math.floor(self.x + 2), math.floor(self.y + 2),
-             self.width - 4, self.height - 4, 3)
+        love.graphics.rectangle('fill', math.floor(self.x), math.floor(self.y),
+        self.width, self.height, 3)
+      
         love.graphics.setColor(1, 1, 1, 1)
     end
 end
