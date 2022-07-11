@@ -58,9 +58,9 @@ function CombatEntity:changeAnimation(name)
     self.currentAnimation = self.animations[name]
 end
 
--- Returns the amount of time it takes to loop through the current animation once
-function CombatEntity:animationPlayTime()
-    return self.currentAnimation.interval * #self.currentAnimation.frames
+-- Returns the amount of time it takes to loop through a given animation once
+function CombatEntity:animationDuration(animName)
+    return self.animations[animName].interval * #self.animations[animName].frames
 end
 
 function CombatEntity:createAnimations(animations)

@@ -81,7 +81,7 @@ function BattleState:update(dt)
         Timer.after(1, function()
             -- After 1 second for the slideIn has passed:
             gStateStack:push(BattleMessageState(self, 'Wild enemies have appeared!'))
-            self.battleMessageActive = true
+           -- self.battleMessageActive = true
             self.renderHUD = true
         end)
     end
@@ -223,6 +223,5 @@ function BattleState:createShader()
             return pixel * color;
         }
     ]]
-    
     return love.graphics.newShader(shaderCode)
 end

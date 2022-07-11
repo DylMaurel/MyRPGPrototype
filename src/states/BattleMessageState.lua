@@ -6,6 +6,7 @@ BattleMessageState = Class{__includes = BaseState}
 
 function BattleMessageState:init(battleState, text, timeTillTrigger, callback)
     self.battleState = battleState
+    self.battleState.battleMessageActive = true
     self.timeTillTrigger = timeTillTrigger or 0
     self.triggerable = false
     self.elapsedTime = 0
@@ -52,9 +53,9 @@ function BattleMessageState:update(dt)
     Timer.update(dt, self.timers)
     
     if self.combatTextbox:isClosed() then
-            self.callback()
             self.battleState.battleMessageActive = false
             gStateStack:pop()
+            self.callback()
     end
  
 end
