@@ -108,11 +108,12 @@ function TakeTurnState:newBattle()
             function()
                 gStateStack:pop() -- pop this TakeTurnState
                 gStateStack:pop() --  pop the underlying BattleState
-                gStateStack:push(BattleState()) -- For testing, push a new battleState
+               -- gStateStack:push(BattleState()) -- For testing, push a new battleState
                 gStateStack:push(FadeOutState({r=1, g=1, b=1}, 0.5, function() end))
             end))
 
 end
+
 function TakeTurnState:checkVictory()
     for i, entity in pairs(self.battleState.opponentParty) do
         if entity.currentHP ~= 0 then
