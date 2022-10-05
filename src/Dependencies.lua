@@ -54,6 +54,11 @@ require 'src/entities/entity_states/EntityWalkState'
 require 'src/entities/entity_states/PlayerIdleState'
 require 'src/entities/entity_states/PlayerWalkState'
 
+
+-- 
+-- Load our resources, which include images, sounds, and fonts. If the game is made larger, then
+-- these resources should eventually be loaded as needed, rather than all at once.
+--
 gTextures = {
     ['player-walk'] = love.graphics.newImage('graphics/Male 14-1.png'),
     ['dog'] = love.graphics.newImage('graphics/Dog 01-3.png'),

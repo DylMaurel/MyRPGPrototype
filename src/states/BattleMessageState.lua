@@ -1,5 +1,6 @@
 --[[
-
+    This class is used to display messages during combat in a box at the top of the screen.
+    It is also a state, so combat doesn't advance until this state is exited.
 ]]
 
 BattleMessageState = Class{__includes = BaseState}

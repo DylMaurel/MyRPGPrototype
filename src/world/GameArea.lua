@@ -1,10 +1,15 @@
 --[[
     myRPG Prototype
+
+    This class parses information from GameArea_Defs to create render a game area that can be connected, by
+    doorways, to other game areas. This class is also responsible for creating the box2d physics world that will
+    calculate all collisions within a game area.
 ]]
 
 GameArea = Class{}
 
 function GameArea:init(def)
+    -- use the Simple Tiled Implementation (sti) library to read a map file that was exported from Tiled.
     self.map = sti(def.filepath)
     self.name = def.areaName
     self.mapWidth = def.width

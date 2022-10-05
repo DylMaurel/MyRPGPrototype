@@ -1,4 +1,8 @@
--- This class can be extended to add more functionality to the player.
+--[[
+    myRPG Prototype
+
+    This class is used when the player is standing still within the FieldState.
+]]
 
 PlayerIdleState = Class{__includes = EntityIdleState}
 

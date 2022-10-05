@@ -11,7 +11,9 @@
 Textbox = Class{}
 
 function Textbox:init(x, y, width, height, text, font)
-    self.panel = Panel(x, y, width, height)
+    self.panel = Panel(x, y, width, height, 
+        {r=1, g=1, b=1, a=0.4},
+        {r=56/255, g=56/255, b=80/255, a=0.8})
     self.x = x
     self.y = y
     self.width = width
@@ -73,6 +75,7 @@ function Textbox:isClosed()
 end
 
 function Textbox:render()
+
     self.panel:render()
     love.graphics.polygon('fill', self.x + self.width - 15, self.y + self.height - 13,
         self.x + self.width - 5, self.y + self.height - 13, self.x + self.width - 10, self.y + self.height - 6 )

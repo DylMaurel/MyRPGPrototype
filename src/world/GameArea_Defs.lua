@@ -1,10 +1,13 @@
 --[[
     MyRPG Prototype
+
+    Definitions file to define the properties of specific game areas.
 ]]
 
 
 GAME_AREA_DEFS = {
     ['town-area'] = {
+        -- Define the path to the map file that was exported from Tiled.
         filepath = 'maps/townMap.lua',
         width = 48,
         height = 27,

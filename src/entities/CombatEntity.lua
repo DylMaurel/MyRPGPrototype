@@ -1,6 +1,8 @@
 --[[
     MyRPG Prototype    
 
+    Used during combat, this class renders an entity to the screen and keeps track of information
+    for that entity.
 ]]
 
 CombatEntity = Class{}

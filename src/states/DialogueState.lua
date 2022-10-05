@@ -1,11 +1,12 @@
 --[[
-
+    The DialogueState is only used when the player is in the open world. A different class
+    is used when the player is in combat. 
 ]]
 
 DialogueState = Class{__includes = BaseState}
 
 function DialogueState:init(dialogues, font, callback)
-    self.dialogues = dialogues
+    self.dialogues = dialogues -- dialogues are defined within entity_defs
     self.font = font or gFonts['small']
     self.textbox = Textbox(6, 6, VIRTUAL_WIDTH - 12, 64, dialogues[1].text, self.font)
     self.currentDialogue = 1

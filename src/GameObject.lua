@@ -1,3 +1,6 @@
+--
+-- Defines the basic characteristics of a game object, in general.
+--
 
 GameObject = Class{}
 

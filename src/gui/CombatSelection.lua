@@ -1,3 +1,8 @@
+--[[
+    This class is used in combat when the player needs to select an entity to perform some
+    action on. It contains a cursor that points towards the different selectable enemies.
+]]
+
 
 CombatSelection = Class{}
 
