@@ -10,7 +10,8 @@ wanted to improve my programming skills.
 
 Here's a summary of some notable features in the game:
 - The player can move around a 2-D world.
-- The player can press 'Enter' to start dialogue with an npc (this can include questions and responses).
+- The player can press 'Enter' to start dialogue with an npc (this may include questions and responses).
+- The player can press 'Enter" while next to a doorway/passage to transition to a different area within the game.
 - Walking in the game area below the starting area has a chance to trigger a combat state.
 - Combat is turn-based, supporting two player-side entities and 1-4 enemy-side entities. Currently, combat is basic, with
 entities only having a single attack, and damage calculations are simple and not left to chance.
