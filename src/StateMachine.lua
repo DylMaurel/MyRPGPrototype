@@ -1,3 +1,5 @@
+-- 
+
 StateMachine = Class{}
 
 function StateMachine:init(states)

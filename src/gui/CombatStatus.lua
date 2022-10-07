@@ -1,5 +1,7 @@
 --[[
     My RPG Prototype
+
+    This class is used to display information about the entities on the player's side.
 ]]
 
 CombatStatus = Class{}

@@ -1,7 +1,10 @@
 --[[
     My RPG Prototype
-
     Author: Dylan Maurel
+
+    This class is responsible for the starting sequence when the player initally enters combat.
+    This class also displays everything in combat. However, this class doesn't govern the flow of combat,
+    the TakeTurnState class is responsible for that.
 ]]
 
 BattleState = Class{__includes = BaseState}

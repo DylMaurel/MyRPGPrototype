@@ -1,3 +1,7 @@
+--[[
+    This class is used when the player is walking around within the FieldState.
+]]
+
 PlayerWalkState = Class{__includes = EntityWalkState}
 
 function PlayerWalkState:init(player, gameArea)

@@ -1,3 +1,8 @@
+--
+-- Although this class is called Doorway, it is used for any sort of passage from one
+-- game area to another. Doorway objects are contained within a GameArea object.
+--
+
 Doorway = Class{}
 
 function Doorway:init(def, onPassThrough)

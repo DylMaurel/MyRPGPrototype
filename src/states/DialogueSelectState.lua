@@ -22,11 +22,13 @@ function DialogueSelectState:init(dialogue)
     end
 
     self.dialogueMenu = Menu {
-        x = VIRTUAL_WIDTH - 64,
-        y = VIRTUAL_HEIGHT - 64,
+        x = VIRTUAL_WIDTH - 80,
+        y = VIRTUAL_HEIGHT - 80,
         width = 64,
         height = 64,
-        items = dialogueAnswers
+        items = dialogueAnswers,
+        backColor = {r=1, g=1, b=1, a=0.4},
+        frontColor = {r=56/255, g=56/255, b=80/255, a=0.8}
     }
 end
 

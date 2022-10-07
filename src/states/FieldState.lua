@@ -107,7 +107,7 @@ function FieldState:update(dt)
         entity.y = entity.collider:getY() - 16
     end
     self.physicsWorld:update(dt)
-    -- The coordinates of the player and player.collider are slightly off,
+    -- The coordinates of the player sprite and player.collider are slightly off,
     -- so we need to subtract some offset values.
     self.player.x = self.player.collider:getX() - 11
     self.player.y = self.player.collider:getY() - 16
@@ -115,7 +115,7 @@ function FieldState:update(dt)
     -- Allow the player to query the world by pressing 'enter' or 'return'.
     -- This means we will create a collider in front of the player and see
     -- if it collides with any interactable objects or entities.
-    self.queryCircle = nil --visualizing the queryCircle
+    self.queryCircle = nil
     if love.keyboard.keysPressed['enter'] or love.keyboard.keysPressed['return'] then
         local queryX = self.player.x + self.player.width * CHARACTER_SCALE
         local queryY = self.player.y + self.player.height * CHARACTER_SCALE + 5
@@ -131,7 +131,7 @@ function FieldState:update(dt)
         elseif self.player.direction == 'down' then
             queryY = queryY + self.player.height * CHARACTER_SCALE
         end
-        self.queryCircle = {x=queryX, y=queryY, radius = 8} --visualizing the queryCircle
+        self.queryCircle = {x=queryX, y=queryY, radius = 8}
         -- Check for interacting with a doorway
         local doorColliders = self.physicsWorld:queryCircleArea(queryX, queryY, 7, {'Doorway'})
         if #doorColliders > 0 then
