@@ -18,7 +18,7 @@ wanted to improve my programming skills.
 
 Here's a summary of some notable features in the game:
 - The player can move around a 2-D world.
-- The player can press 'Enter' to start dialogue with an npc (this may include questions and responses).
+- The player can press 'Enter' to start dialogue with an npc. Dialogue may include questions and responses, which can lead to more questions and responses, and so on.
 - The player can press 'Enter" while next to a doorway/passage to transition to a different area within the game.
 - The game area below the starting area has a chance to trigger a combat state when the player is walking. The combat state is stacked on top of the current state; 
   so when combat ends, the combat state is popped, and the player is in the same state they were in before combat began.
