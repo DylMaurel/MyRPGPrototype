@@ -16,4 +16,8 @@ Here's a summary of some notable features in the game:
 - Combat is turn-based, supporting two player-side entities and 1-4 enemy-side entities. Currently, combat is basic, with
 entities only having a single attack, and damage calculations are simple and not left to chance.
 
+Example of question-and-answer dialogue:
+![dialogue-screenshot](projectInfo/dialogueScreenshot.png)
+
+Example of an attack in combat:
 ![combat-example-gif](projectInfo/combatAttack.gif)
