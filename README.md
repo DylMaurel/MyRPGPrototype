@@ -12,7 +12,14 @@ Here's a summary of some notable features in the game:
 - The player can move around a 2-D world.
 - The player can press 'Enter' to start dialogue with an npc (this may include questions and responses).
 - The player can press 'Enter" while next to a doorway/passage to transition to a different area within the game.
-- Walking in the game area below the starting area has a chance to trigger a combat state.
+- Walking in the game area below the starting area has a chance to trigger a combat state that is stacked upon the current state.
 - Combat is turn-based, supporting two player-side entities and 1-4 enemy-side entities. Currently, combat is basic, with
 entities only having a single attack, and damage calculations are simple and not left to chance.
 
+Example of question-and-answer dialogue:
+
+![dialogue-screenshot](projectInfo/dialogueScreenshot.png)
+
+Example of an attack in combat. (This gif may take a moment to load):
+
+![combat-example-gif](projectInfo/combatAttack.gif)
