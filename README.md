@@ -17,7 +17,9 @@ Here's a summary of some notable features in the game:
 entities only having a single attack, and damage calculations are simple and not left to chance.
 
 Example of question-and-answer dialogue:
+
 ![dialogue-screenshot](projectInfo/dialogueScreenshot.png)
 
-Example of an attack in combat:
+Example of an attack in combat. (This gif may take a moment to load):
+
 ![combat-example-gif](projectInfo/combatAttack.gif)
